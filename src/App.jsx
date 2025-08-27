@@ -1,4 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, Fragment } from 'react';
+
+// Theme initialization
+const initializeTheme = () => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        return 'dark';
+    } else {
+        document.documentElement.classList.remove('dark');
+        return 'light';
+    }
+};
 import { Award, Shirt, Info, ShieldCheck, MusicIcon, UserCircle, BookOpen, LogIn, UserPlus, Home, LogOut, Settings, PlusCircle, Edit, Trash2, ChevronLeft, Users, Puzzle, Crosshair, Map, ChevronDown, Calendar, ListChecks, FileText, ArrowUp, ArrowDown, ArrowRight, HeartPulse, MailCheck, Menu, X, Shield, Bell, Sun, Moon, CheckCircle, Lock } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';

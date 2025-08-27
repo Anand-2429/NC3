@@ -1,0 +1,34 @@
+import React, { useState, useEffect, useCallback, useRef, useMemo, Fragment } from 'react';
+import { Award, Shirt, Info, ShieldCheck, MusicIcon, UserCircle, BookOpen, LogIn, UserPlus, Home, LogOut, Settings, PlusCircle, Edit, Trash2, ChevronLeft, Users, Puzzle, Crosshair, Map, ChevronDown, Calendar, ListChecks, FileText, ArrowUp, ArrowDown, ArrowRight, HeartPulse, MailCheck, Menu, X, Shield, Bell, Sun, Moon, CheckCircle, Lock } from 'lucide-react';
+
+function App() {
+    // Initialize theme from localStorage or system preference
+    const [theme, setTheme] = useState(() => {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            return 'dark';
+        }
+        return 'light';
+    });
+
+    const toggleTheme = useCallback(() => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.theme = newTheme;
+        
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [theme]);
+
+    // Rest of your App component code...
+    return (
+        <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
+            <Header setPage={setPage} user={user} setUser={setUser} userData={userData} theme={theme} toggleTheme={toggleTheme} />
+            {/* Rest of your component JSX */}
+        </div>
+    );
+}
+
+export default App;
