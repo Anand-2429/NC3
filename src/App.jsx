@@ -4997,7 +4997,7 @@ const drillData = {
     savdhan: {
         title: "Learn to Do Savdhan",
         description: "The position of attention in drill.",
-        videoSrc: "https://www.youtube.com/embed/rZMpTBkSg-Y",
+        videoSrc: "https://www.youtube.com/embed/PjLMrbzxaEg",
         steps: [
             { text: "Stand perfectly straight with your body erect and head up." },
             { text: "Your heels should be together, with feet forming a 30-degree angle." },
@@ -5009,7 +5009,7 @@ const drillData = {
     vishram: {
         title: "Learn to Do Vishram",
         description: "The position of standing at ease.",
-        videoSrc: "https://www.youtube.com/embed/_ssgcB6DsEA",
+        videoSrc: "https://www.youtube.com/embed/Op_Jp5eg6Ik",
         steps: [
             { text: "From the Savdhan position, lift your left foot smartly." },
             { text: "Place your left foot about 12 inches to your left." },
@@ -5019,9 +5019,9 @@ const drillData = {
         ]
     },
     dahineSalute: {
-        title: "Learn to Do Dahine Salute",
+        title: "Learn to Do Samne Salute",
         description: "The standard right-hand salute.",
-        videoSrc: "https://www.youtube.com/embed/9AAuFo7xGYo",
+        videoSrc: "https://www.youtube.com/embed/jYjdQ_HrNe0",
         steps: [
             { text: "Begin in the <b>Savdhan</b> (attention) position, standing perfectly straight." },
             { text: "Raise your right hand, taking the shortest possible route up." },
@@ -5137,7 +5137,7 @@ const DrillPageLayout = ({ title, description, videoSrc, videoTitle, steps, chil
                                 </button>
                             </>
                         )}
-                        {title === "Learn to Do Dahine Salute" && (
+                        {title === "Learn to Do Samne Salute" && (
                              <>
                                 <h3 className="text-xl font-semibold text-white mb-4">Ready to practice the Salute?</h3>
                                 <button
