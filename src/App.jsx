@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, Fragment } from 'react';
-
-// Theme initialization
-const initializeTheme = () => {
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        return 'dark';
-    } else {
-        document.documentElement.classList.remove('dark');
-        return 'light';
-    }
-};
-import { Award, Shirt, Info, ShieldCheck, MusicIcon, UserCircle, BookOpen, LogIn, UserPlus, Home, LogOut, Settings, PlusCircle, Edit, Trash2, ChevronLeft, Users, Puzzle, Crosshair, Map, ChevronDown, Calendar, ListChecks, FileText, ArrowUp, ArrowDown, ArrowRight, HeartPulse, MailCheck, Menu, X, Shield, Bell, Sun, Moon, CheckCircle, Lock } from 'lucide-react';
+import { Award, Shirt, Info, ToyBrick, ShieldCheck, MusicIcon, UserCircle, BookOpen, LogIn, UserPlus, Home, LogOut, Settings, PlusCircle, Edit, Trash2, ChevronLeft, Users, Puzzle, Crosshair, Map, ChevronDown, Calendar, ListChecks, FileText, ArrowUp, ArrowDown, ArrowRight, HeartPulse, MailCheck, Menu, X, Shield, Bell, Sun, Moon, CheckCircle, Lock } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as Tone from 'tone';
@@ -238,6 +227,1231 @@ const LoginPage = ({ setPage }) => {
         </div>
     );
 };
+
+const ObstacleCourseGame = ({ setPage }) => {
+    const mountRef = useRef(null);
+    const [isLocked, setIsLocked] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+    const [speed, setSpeed] = useState(5.0); // State for player speed
+    const [isCourseComplete, setIsCourseComplete] = useState(false);
+    const speedRef = useRef(speed); // Ref to pass speed to the animation loop
+    const teleportRef = useRef(null); // Ref to hold the teleport function
+    const audioRef = useRef(null); // Ref for the audio object
+
+    // Effect to keep the ref updated when the state changes
+    useEffect(() => {
+        speedRef.current = speed;
+    }, [speed]);
+
+    useEffect(() => {
+        if (audioRef.current && audioRef.current.buffer) { // Check if audio is loaded
+            if (isMuted) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.play();
+            }
+        }
+    }, [isMuted]);
+
+    useEffect(() => {
+        const mountNode = mountRef.current;
+        if (!mountNode) return;
+
+        // --- Basic Scene Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb); // Sky blue background
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        mountNode.appendChild(renderer.domElement);
+        
+        // --- Audio Setup ---
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        const sound = new THREE.Audio(listener);
+        audioRef.current = sound;
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load(
+            'https://cdn.pixabay.com/download/audio/2022/11/21/audio_a14dc5897a.mp3', // FIX: Replaced unreliable music URL
+            function(buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(true);
+                sound.setVolume(0.2);
+            });
+        
+        const activeFireworks = [];
+        const textureLoader = new THREE.TextureLoader();
+
+        // --- Create Text Texture ---
+        const createTextCanvas = (text, width, height, backgroundColor = '#3d3d3d', textColor = 'white', fontSize = height * 0.5) => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+
+            // Background
+            context.fillStyle = backgroundColor;
+            context.fillRect(0, 0, width, height);
+
+            // Text properties
+            context.font = `bold ${fontSize}px Arial`;
+            context.fillStyle = textColor;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, width / 2, height / 2);
+
+            return canvas;
+        };
+        
+        const climbSignCanvas = createTextCanvas('Climb the Walls', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const climbSignTexture = new THREE.CanvasTexture(climbSignCanvas);
+
+        const crawlSignCanvas = createTextCanvas('Crawl the Tunnels', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const crawlSignTexture = new THREE.CanvasTexture(crawlSignCanvas);
+
+        const crossBarsSignCanvas = createTextCanvas('Cross the bars', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const crossBarsSignTexture = new THREE.CanvasTexture(crossBarsSignCanvas);
+
+        const hurdlesSignCanvas = createTextCanvas('Jump the Hurdles', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const hurdlesSignTexture = new THREE.CanvasTexture(hurdlesSignCanvas);
+        
+        const sweeperSignCanvas = createTextCanvas('Avoid the Sweeper', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const sweeperSignTexture = new THREE.CanvasTexture(sweeperSignCanvas);
+
+        const windmillSignCanvas = createTextCanvas('Dodge the Windmills', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const windmillSignTexture = new THREE.CanvasTexture(windmillSignCanvas);
+
+        const pistonSignCanvas = createTextCanvas('Time the Pistons', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const pistonSignTexture = new THREE.CanvasTexture(pistonSignCanvas);
+
+        const tilesSignCanvas = createTextCanvas('Cross the Tiles', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const tilesSignTexture = new THREE.CanvasTexture(tilesSignCanvas);
+
+        const laserSignCanvas = createTextCanvas('Dodge the Lasers', 1024, 256, '#F5DEB3', '#8B4513', 100);
+        const laserSignTexture = new THREE.CanvasTexture(laserSignCanvas);
+
+        // --- Create Hand Model ---
+        const createHand = () => {
+    const hand = new THREE.Group();
+
+    const skinMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffd1a4,
+        roughness: 0.4,
+        metalness: 0.05
+    });
+
+    // Palm (rounded box)
+    const palmGeometry = new THREE.BoxGeometry(0.22, 0.1, 0.05);
+    const palm = new THREE.Mesh(palmGeometry, skinMaterial);
+    palm.position.y = -0.05;
+    hand.add(palm);
+
+    // Function to create finger with 3 segments (phalanges) + curvature
+    const createFinger = (lengths, radius) => {
+        const finger = new THREE.Group();
+        let yOffset = 0;
+        for (let i = 0; i < lengths.length; i++) {
+            const segGeo = new THREE.CapsuleGeometry(radius * (1 - i*0.15), lengths[i], 6, 12);
+            const seg = new THREE.Mesh(segGeo, skinMaterial);
+
+            seg.position.y = yOffset + lengths[i] / 2;
+
+            // Apply slight forward bend to mimic natural curve
+            seg.rotation.x = (i + 1) * 0.08; // gradual bend
+
+            // Knuckle bulge
+            if (i === 0) {
+                const knuckleGeo = new THREE.SphereGeometry(radius * 1.2, 8, 8);
+                const knuckle = new THREE.Mesh(knuckleGeo, skinMaterial);
+                knuckle.position.set(0, -lengths[i] / 2, 0);
+                seg.add(knuckle);
+            }
+
+            // Nail at fingertip
+            if (i === lengths.length - 1) {
+                const nailGeo = new THREE.CylinderGeometry(radius * 0.6, radius * 0.6, 0.002, 12);
+                const nailMat = new THREE.MeshStandardMaterial({ color: 0xffe5d0, roughness: 0.2 });
+                const nail = new THREE.Mesh(nailGeo, nailMat);
+                nail.rotation.x = Math.PI / 2;
+                nail.position.y = lengths[i] / 2 + 0.001;
+                seg.add(nail);
+            }
+
+            finger.add(seg);
+            yOffset += lengths[i];
+        }
+        return finger;
+    };
+
+    // Finger proportions
+    const fingerLengths = [
+        [0.07, 0.05, 0.04],   // Index
+        [0.075, 0.055, 0.045], // Middle
+        [0.07, 0.05, 0.04],   // Ring
+        [0.06, 0.045, 0.035]  // Pinky
+    ];
+
+    const fingerAngles = [15, 5, -5, -15];
+    const spacing = 0.05;
+    const startX = -1.5 * spacing;
+
+    // Build fingers
+    for (let i = 0; i < 4; i++) {
+        const fingerPivot = new THREE.Group();
+        fingerPivot.position.set(startX + i * spacing, 0, 0.03);
+
+        const finger = createFinger(fingerLengths[i], 0.018 + (i === 1 ? 0.002 : 0));
+        fingerPivot.add(finger);
+
+        fingerPivot.rotation.z = fingerAngles[i] * (Math.PI / 180);
+        hand.add(fingerPivot);
+    }
+
+    // Thumb (shorter + angled + curved)
+    const thumbPivot = new THREE.Group();
+    thumbPivot.position.set(-0.1, -0.02, 0);
+    thumbPivot.rotation.z = Math.PI / 4;
+
+    const thumb = createFinger([0.05, 0.035], 0.022);
+    thumb.rotation.x = -0.25; // more bend for thumb
+    thumbPivot.add(thumb);
+
+    hand.add(thumbPivot);
+
+    hand.scale.set(0.8, 0.8, 0.8);
+
+    return hand;
+};
+
+
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 15, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        scene.add(directionalLight);
+
+        // --- Player Setup ---
+        const player = new THREE.Group();
+        camera.position.set(0, 1.6, 0);
+        player.add(camera);
+        player.position.set(0, 0.5, 5);
+        scene.add(player);
+
+        const leftHand = createHand();
+        const rightHand = createHand();
+        leftHand.scale.x = -1;
+        leftHand.position.set(-0.4, -0.3, -0.7);
+        rightHand.position.set(0.4, -0.3, -0.7);
+        camera.add(leftHand);
+        camera.add(rightHand);
+        
+        // --- Player State & Physics ---
+        const playerVelocity = new THREE.Vector3();
+        const gravity = -9.8;
+        let isGrounded = false;
+        let isCrawling = false;
+        let isOnWall = false;
+        let isHanging = false;
+        
+        const playerHeight = 1.8;
+        const playerCrawlHeight = 0.8;
+        const playerBBox = new THREE.Box3();
+        const playerSize = new THREE.Vector3(0.5, playerHeight, 0.5);
+        
+        const updatePlayerBBox = () => {
+            playerBBox.setFromCenterAndSize(player.position, playerSize);
+        };
+        
+        // --- Teleport Logic ---
+        const teleportLocations = {
+            walls: new THREE.Vector3(0, playerHeight / 2, 0),
+            tunnels: new THREE.Vector3(0, playerHeight / 2, -62),
+            bars: new THREE.Vector3(0, playerHeight / 2, -117),
+            hurdles: new THREE.Vector3(0, playerHeight / 2, -137),
+            sweepers: new THREE.Vector3(0, playerHeight / 2, -187),
+            windmills: new THREE.Vector3(0, playerHeight / 2, -237),
+            pistons: new THREE.Vector3(0, playerHeight / 2, -272),
+            tiles: new THREE.Vector3(0, playerHeight / 2, -322),
+            lasers: new THREE.Vector3(0, playerHeight / 2, -367),
+        };
+
+        let completionZones; // Declare here to be accessible in teleportRef
+
+        teleportRef.current = (locationKey) => {
+            const location = teleportLocations[locationKey];
+            if (player && location) {
+                player.position.copy(location);
+                playerVelocity.set(0, 0, 0); // Reset velocity after teleport
+                // Reset firework triggers when restarting
+                if (locationKey === 'walls' && completionZones) {
+                    completionZones.forEach(zone => zone.completed = false);
+                }
+            }
+            setIsSidebarOpen(false);
+        };
+
+        // --- Firework Effect ---
+        const createFirework = (position) => {
+            const particleCount = 100; // Was 50
+            const activeParticlesList = [];
+            const particlesGroup = new THREE.Group();
+            scene.add(particlesGroup);
+
+            const particleGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+
+            for (let i = 0; i < particleCount; i++) {
+                const particleMaterial = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(Math.random(), 1.0, 0.6),
+                    transparent: true,
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+                const speed = Math.random() * 5 + 3;
+                const velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * speed,
+                    (Math.random() - 0.5) * speed,
+                    (Math.random() - 0.5) * speed
+                );
+                velocity.y += 2; // Bias upwards
+
+                particle.position.copy(position);
+                particlesGroup.add(particle);
+                
+                const lifetime = Math.random() * 1.0 + 0.5; // 0.5 to 1.5 seconds
+                activeParticlesList.push({
+                    mesh: particle,
+                    velocity: velocity,
+                    lifetime: lifetime,
+                    initialLifetime: lifetime,
+                });
+            }
+            activeFireworks.push({ group: particlesGroup, particles: activeParticlesList });
+        };
+
+
+        // --- Controls ---
+        const keys = {};
+        let spaceJustPressed = false;
+        const onKeyDown = (event) => { 
+            // Prevent spacebar from triggering button clicks
+            if (event.code === 'Space') {
+                event.preventDefault();
+                spaceJustPressed = true;
+            }
+            keys[event.code] = true;
+            if (event.code === 'ArrowUp') setSpeed(s => s + 1.0);
+            if (event.code === 'ArrowDown') setSpeed(s => Math.max(1.0, s - 1.0));
+        };
+        const onKeyUp = (event) => { keys[event.code] = false; };
+        
+        const onMouseMove = (event) => {
+            if (!document.pointerLockElement) return;
+            player.rotation.y -= event.movementX * 0.002;
+            camera.rotation.x -= event.movementY * 0.002;
+            camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+        };
+
+        const setupControls = () => {
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousemove', onMouseMove);
+            mountNode.addEventListener('click', () => {
+                 if (mountNode && document.pointerLockElement !== mountNode) {
+                    mountNode.requestPointerLock(); // FIX: Removed .catch() to prevent TypeError
+
+                    // Start audio context on first user interaction
+                    if (audioRef.current && audioRef.current.buffer && !audioRef.current.isPlaying) {
+                        audioRef.current.play();
+                        if(isMuted) { // If it should start muted, pause it immediately after starting context.
+                           audioRef.current.pause();
+                        }
+                    }
+                 }
+            });
+            document.addEventListener('pointerlockchange', () => {
+                setIsLocked(document.pointerLockElement === mountNode);
+            });
+        };
+        setupControls();
+
+        // --- World and Obstacles ---
+        const obstacles = [];
+        const movingObstacles = [];
+        const movingPlatforms = [];
+        const waterZones = [];
+
+        // Load Section Floor Textures
+        const monkeyBarsFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/everglades-2763947_960_720.jpg?updatedAt=1757227013508');
+        const hurdlesFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/dry-grass-texture-background-with-green-grass-texture-dry-grass_323960-483.jpg?updatedAt=1757227121206');
+        const sweepersFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/download%20(1).jpeg?updatedAt=1757227254042');
+        const windmillsFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/download%20(2).jpeg?updatedAt=1757227320822');
+        const pistonsFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/download%20(3).jpeg?updatedAt=1757227369665');
+        const laserGridFloorTexture = textureLoader.load('https://ik.imagekit.io/srlsan767/istockphoto-520861969-612x612.jpg?updatedAt=1757227479514');
+
+
+        const floorGeometry = new THREE.PlaneGeometry(100, 100);
+        const grassTexture = textureLoader.load('https://ik.imagekit.io/jgam2ldzm/seamless-green-grass-pattern_1284-52275.jpg?updatedAt=1757208442115');
+        grassTexture.wrapS = THREE.RepeatWrapping;
+        grassTexture.wrapT = THREE.RepeatWrapping;
+        grassTexture.repeat.set(50, 50);
+        const floorMaterial = new THREE.MeshLambertMaterial({ map: grassTexture });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+        
+        const createSectionFloor = (startZ, length, texture) => {
+            const geometry = new THREE.PlaneGeometry(roomWidth, length);
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.repeat.set(1, 1);
+            const material = new THREE.MeshLambertMaterial({ map: texture });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(0, 0.01, startZ - length / 2); // Slightly above base floor to prevent z-fighting
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+        };
+
+        const createObstacle = (size, position, { color = 0xffffff, isClimbable = false, grabbable = false, textureUrl = null, texture = null, textureRepeat = {x: 1, y: 1}, isVisible = true, isEntryWall = false, isExitWall = false, clampTexture = false } = {}) => {
+            const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+            let material;
+            if (texture) {
+                material = new THREE.MeshStandardMaterial({ map: texture });
+            } else if (textureUrl) {
+                const loadedTexture = textureLoader.load(textureUrl);
+                if (clampTexture) {
+                    loadedTexture.wrapS = THREE.ClampToEdgeWrapping;
+                    loadedTexture.wrapT = THREE.ClampToEdgeWrapping;
+                } else {
+                    loadedTexture.wrapS = THREE.RepeatWrapping;
+                    loadedTexture.wrapT = THREE.RepeatWrapping;
+                }
+                loadedTexture.repeat.set(textureRepeat.x, textureRepeat.y); 
+                material = new THREE.MeshStandardMaterial({ map: loadedTexture });
+            } else {
+                material = new THREE.MeshStandardMaterial({ color });
+            }
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(position);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.visible = isVisible;
+            scene.add(mesh);
+            const bbox = new THREE.Box3().setFromObject(mesh);
+            const obstacleObject = { mesh, bbox, climbable: isClimbable, grabbable, isEntryWall, isExitWall, isPlatform: false };
+            obstacles.push(obstacleObject);
+            return { mesh, bbox, obstacleObject };
+        };
+
+        const roomWidth = 12;
+
+        // Completion Zones for Fireworks
+        completionZones = [
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -56), new THREE.Vector3(roomWidth / 2, 5, -54)), completed: false }, // After walls
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -116), new THREE.Vector3(roomWidth / 2, 5, -114)), completed: false }, // After tunnels
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -139), new THREE.Vector3(roomWidth / 2, 5, -137)), completed: false }, // After monkey bars
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -186), new THREE.Vector3(roomWidth / 2, 5, -184)), completed: false }, // After hurdles
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -236), new THREE.Vector3(roomWidth / 2, 5, -234)), completed: false }, // After sweepers
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -269), new THREE.Vector3(roomWidth / 2, 5, -267)), completed: false }, // After windmills
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -319), new THREE.Vector3(roomWidth / 2, 5, -317)), completed: false }, // After pistons
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -362), new THREE.Vector3(roomWidth / 2, 5, -360)), completed: false }, // After tiles
+            { bbox: new THREE.Box3(new THREE.Vector3(-roomWidth / 2, 0, -414), new THREE.Vector3(roomWidth / 2, 5, -412)), completed: false, isFinal: true }, // After lasers
+        ];
+
+        // Banners
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -3}, { texture: climbSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -3}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -3}, { color: 0x8b4513 });
+
+        // Walls
+        const wallTextures = [
+            'https://ik.imagekit.io/srlsan767/07.09.2025_12.57.10_REC.png?updatedAt=1757230045037', 
+            'https://ik.imagekit.io/jgam2ldzm/download.jpeg?updatedAt=1757195581459', 
+            'https://ik.imagekit.io/jgam2ldzm/download%20(3).jpeg?updatedAt=1757195581442', 
+            'https://ik.imagekit.io/jgam2ldzm/download%20(2).jpeg?updatedAt=1757195581376', 
+            'https://ik.imagekit.io/jgam2ldzm/download%20(1).jpeg?updatedAt=1757195581353'
+        ];
+        for (let i = 0; i < 5; i++) {
+            createObstacle(
+                {x: roomWidth, y: 3, z: 0.5}, 
+                {x: 0, y: 1.5, z: -10 - (i * 10)}, 
+                { 
+                    isClimbable: true, 
+                    textureUrl: wallTextures[i],
+                    textureRepeat: { x: 1, y: 1 },
+                    clampTexture: true
+                }
+            );
+        }
+
+        // Tunnels
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -65}, { texture: crawlSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -65}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -65}, { color: 0x8b4513 });
+        const tunnelTextures = ['https://ik.imagekit.io/jgam2ldzm/images.jpeg?updatedAt=1757195863340', 'https://ik.imagekit.io/jgam2ldzm/download%20(4).jpeg?updatedAt=1757195863361'];
+        for (let i = 0; i < 3; i++) {
+            createObstacle({ x: roomWidth, y: 0.5, z: 12 }, { x: 0, y: 1.2 + 0.5 / 2, z: -75 - (i * 15) }, { textureUrl: tunnelTextures[i % tunnelTextures.length], textureRepeat: { x: 3, y: 3 } });
+        }
+        
+        // Monkey Bars
+        createSectionFloor(-122, 15, monkeyBarsFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -120}, { texture: crossBarsSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -120}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -120}, { color: 0x8b4513 });
+        const monkeyBarsStartZ = -125;
+        const monkeyBarsLength = 10;
+        const barHeight = 4;
+        const barSpacing = 1;
+        const numBars = Math.floor(monkeyBarsLength / barSpacing);
+        const monkeyBarsBBox = new THREE.Box3(new THREE.Vector3(-roomWidth / 2, barHeight - 0.2, monkeyBarsStartZ - monkeyBarsLength), new THREE.Vector3(roomWidth / 2, barHeight + 0.2, monkeyBarsStartZ));
+        createObstacle( { x: 0.2, y: 0.2, z: monkeyBarsLength }, { x: -(roomWidth/2) + 0.1, y: barHeight, z: monkeyBarsStartZ - monkeyBarsLength / 2 }, { color: 0x555555 } );
+        createObstacle( { x: 0.2, y: 0.2, z: monkeyBarsLength }, { x: (roomWidth/2) - 0.1, y: barHeight, z: monkeyBarsStartZ - monkeyBarsLength / 2 }, { color: 0x555555 } );
+        for (let i = 0; i < numBars; i++) {
+            createObstacle( { x: roomWidth, y: 0.2, z: 0.2 }, { x: 0, y: barHeight, z: monkeyBarsStartZ - (i * barSpacing) }, { color: 0x777777, grabbable: true } );
+        }
+
+        // Invisible walls to force grabbing the bars
+        const invisibleWallHeight = barHeight - 0.5;
+        createObstacle({x: roomWidth, y: invisibleWallHeight, z: 0.5}, {x: 0, y: invisibleWallHeight/2, z: monkeyBarsStartZ + 0.25}, { isVisible: false, isEntryWall: true });
+        createObstacle({x: roomWidth, y: invisibleWallHeight, z: 0.5}, {x: 0, y: invisibleWallHeight/2, z: monkeyBarsStartZ - monkeyBarsLength - 0.25}, { isVisible: false, isExitWall: true });
+
+        // Hurdles
+        createSectionFloor(-138, 48, hurdlesFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -140}, { texture: hurdlesSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -140}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -140}, { color: 0x8b4513 });
+        const hurdleHeight = 1.5;
+        const hurdleColor = { color: 0xcc8855 };
+        for (let i = 0; i < 5; i++) {
+            createObstacle({ x: roomWidth - 1, y: hurdleHeight, z: 0.2 }, { x: 0, y: hurdleHeight / 2, z: -145 - (i * 8) }, { ...hurdleColor });
+        }
+
+        // Rotating Crosses (Sweepers)
+        createSectionFloor(-188, 45, sweepersFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -190}, { texture: sweeperSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -190}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -190}, { color: 0x8b4513 });
+        const sweeperCenter1 = new THREE.Vector3(0, 0, -200);
+        createObstacle({ x: 1, y: 4, z: 1 }, sweeperCenter1.clone().setY(2), { color: 0x444444 });
+        const rotatingCrossGroup1 = new THREE.Group();
+        rotatingCrossGroup1.position.copy(sweeperCenter1);
+        scene.add(rotatingCrossGroup1);
+        const armLength = 5.5;
+        const armSize = new THREE.Vector3(armLength, 0.5, 0.5);
+        const armMaterial1 = new THREE.MeshStandardMaterial({ color: 0xdd4444 });
+        const armPositions = [
+            { pos: new THREE.Vector3(armLength / 2, 0.75, 0), rot: new THREE.Vector3(0,0,0) },
+            { pos: new THREE.Vector3(-(armLength / 2), 0.75, 0), rot: new THREE.Vector3(0,0,0) },
+            { pos: new THREE.Vector3(0, 2.75, armLength / 2), rot: new THREE.Vector3(0, Math.PI / 2, 0) },
+            { pos: new THREE.Vector3(0, 2.75, -(armLength / 2)), rot: new THREE.Vector3(0, Math.PI / 2, 0) },
+        ];
+        for (const arm of armPositions) {
+            const armGeometry = new THREE.BoxGeometry(armSize.x, armSize.y, armSize.z);
+            const armMesh = new THREE.Mesh(armGeometry, armMaterial1);
+            armMesh.position.copy(arm.pos);
+            armMesh.rotation.set(arm.rot.x, arm.rot.y, arm.rot.z);
+            armMesh.castShadow = true;
+            armGeometry.computeBoundingBox(); // Pre-calculate the bounding box
+            rotatingCrossGroup1.add(armMesh);
+            movingObstacles.push({ mesh: armMesh, bbox: new THREE.Box3(), restartKey: 'sweepers' });
+        }
+        
+        // Second Rotating Cross (Sweeper 2)
+        const sweeperCenter2 = new THREE.Vector3(0, 0, -225);
+        createObstacle({ x: 1, y: 4, z: 1 }, sweeperCenter2.clone().setY(2), { color: 0x444444 });
+        const rotatingCrossGroup2 = new THREE.Group();
+        rotatingCrossGroup2.position.copy(sweeperCenter2);
+        scene.add(rotatingCrossGroup2);
+        const armMaterial2 = new THREE.MeshStandardMaterial({ color: 0x4444dd }); // Different color
+        for (const arm of armPositions) {
+            const armGeometry = new THREE.BoxGeometry(armSize.x, armSize.y, armSize.z);
+            const armMesh = new THREE.Mesh(armGeometry, armMaterial2);
+            armMesh.position.copy(arm.pos);
+            armMesh.rotation.set(arm.rot.x, arm.rot.y, arm.rot.z);
+            armMesh.castShadow = true;
+            armGeometry.computeBoundingBox();
+            rotatingCrossGroup2.add(armMesh);
+            movingObstacles.push({ mesh: armMesh, bbox: new THREE.Box3(), restartKey: 'sweepers' });
+        }
+
+        // Windmills
+        createSectionFloor(-238, 35, windmillsFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -240}, { texture: windmillSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -240}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -240}, { color: 0x8b4513 });
+        
+        const createWindmill = (position, color) => {
+            const windmillGroup = new THREE.Group();
+            windmillGroup.position.copy(position);
+            scene.add(windmillGroup);
+
+            const armFullLength = 12; // Was 8
+            const armThickness = 0.4;
+            const armSize = new THREE.Vector3(armFullLength, armThickness, armThickness);
+            const armMaterial = new THREE.MeshStandardMaterial({ color });
+            const armGeometry = new THREE.BoxGeometry(armSize.x, armSize.y, armSize.z);
+
+            const arm1 = new THREE.Mesh(armGeometry, armMaterial); // Horizontal
+            const arm2 = new THREE.Mesh(armGeometry, armMaterial); // Vertical
+            arm2.rotation.z = Math.PI / 2;
+
+            windmillGroup.add(arm1, arm2);
+
+            [arm1, arm2].forEach(arm => {
+                arm.castShadow = true;
+                arm.geometry.computeBoundingBox();
+                movingObstacles.push({ mesh: arm, bbox: new THREE.Box3(), restartKey: 'windmills' });
+            });
+
+            createObstacle({ x: 0.8, y: 0.8, z: 1 }, position.clone().setZ(position.z + 0.5), { color: 0x444444 });
+            return windmillGroup;
+        }
+
+        const windmill1 = createWindmill(new THREE.Vector3(0, 4, -250), 0x33aa33);
+        const windmill2 = createWindmill(new THREE.Vector3(0, 4, -260), 0xaa3333);
+
+        // Piston Wall
+        createSectionFloor(-273, 45, pistonsFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -275}, { texture: pistonSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -275}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -275}, { color: 0x8b4513 });
+
+        const createPiston = (startPos, size, moveVector, {speed, phase, color=0x666666}) => {
+            const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+            const material = new THREE.MeshStandardMaterial({ color });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(startPos);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            geometry.computeBoundingBox();
+
+            movingObstacles.push({
+                mesh,
+                bbox: new THREE.Box3(),
+                restartKey: 'pistons',
+                type: 'piston', // Custom type for animation logic
+                startPos: startPos.clone(),
+                moveVector: moveVector.clone(), // The direction and distance to move
+                speed,
+                phase
+            });
+            return mesh;
+        }
+
+        const pistonSize = new THREE.Vector3(4, 5, 2);
+        const pistonY = pistonSize.y / 2;
+        const wallOffset = roomWidth / 2;
+        const pistonRetractedX = wallOffset - pistonSize.x / 2;
+
+        createPiston(new THREE.Vector3(-pistonRetractedX, pistonY, -285), pistonSize, new THREE.Vector3(8, 0, 0), { speed: 1.2, phase: 0 });
+        createPiston(new THREE.Vector3(pistonRetractedX, pistonY, -292), pistonSize, new THREE.Vector3(-8, 0, 0), { speed: 1.5, phase: Math.PI });
+        createPiston(new THREE.Vector3(-pistonRetractedX, pistonY, -299), pistonSize, new THREE.Vector3(8, 0, 0), { speed: 1.8, phase: Math.PI / 2 });
+        createPiston(new THREE.Vector3(pistonRetractedX, pistonY, -306), pistonSize, new THREE.Vector3(-8, 0, 0), { speed: 2.1, phase: 3 * Math.PI / 2 });
+        createPiston(new THREE.Vector3(-pistonRetractedX, pistonY, -313), pistonSize, new THREE.Vector3(8, 0, 0), { speed: 2.4, phase: 0 });
+
+        // Floating Tiles
+        // Water is the floor for this section, so no new floor mesh needed.
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -325}, { texture: tilesSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -325}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -325}, { color: 0x8b4513 });
+
+        const createFloatingTile = (startPos, size, moveVector, { speed, phase, color = 0x888888 }) => {
+            const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+            const material = new THREE.MeshStandardMaterial({ color });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(startPos);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const bbox = new THREE.Box3().setFromObject(mesh);
+            const obstacleRef = { mesh, bbox, isPlatform: true };
+            obstacles.push(obstacleRef);
+
+            movingPlatforms.push({
+                obstacleRef, // Reference to the object in the main obstacles array
+                startPos: startPos.clone(),
+                moveVector: moveVector.clone(),
+                speed,
+                phase,
+                lastPosition: startPos.clone()
+            });
+            return mesh;
+        };
+
+        const tilesSectionZ = -330;
+        const tilesSectionLength = 32;
+        const waterGeometry = new THREE.BoxGeometry(roomWidth, 0.2, tilesSectionLength);
+        const waterMaterial = new THREE.MeshStandardMaterial({ color: 0x006994, transparent: true, opacity: 0.8 });
+        const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+        waterMesh.position.set(0, -0.1, tilesSectionZ - tilesSectionLength / 2);
+        scene.add(waterMesh);
+        
+        const waterBBox = new THREE.Box3().setFromObject(waterMesh);
+        waterBBox.max.y = 0.0; // We only care if the player's feet are below water level
+        waterZones.push({bbox: waterBBox, restartKey: 'tiles'});
+        
+        const tileHeight = 0.5;
+        const tileSize = new THREE.Vector3(2.5, tileHeight, 2.5);
+
+        createFloatingTile(new THREE.Vector3(-3, tileHeight / 2, -335), tileSize, new THREE.Vector3(6, 0, 0), { speed: 0.8, phase: 0 });
+        createFloatingTile(new THREE.Vector3(3, tileHeight / 2, -340), tileSize, new THREE.Vector3(-6, 0, 0), { speed: 0.9, phase: Math.PI });
+        createFloatingTile(new THREE.Vector3(-3, tileHeight / 2, -345), tileSize, new THREE.Vector3(6, 0, 0), { speed: 0.8, phase: 0.5 });
+        createFloatingTile(new THREE.Vector3(3, tileHeight / 2, -350), tileSize, new THREE.Vector3(-6, 0, 0), { speed: 1.0, phase: Math.PI / 2 });
+        createFloatingTile(new THREE.Vector3(-3, tileHeight / 2, -355), tileSize, new THREE.Vector3(6, 0, 0), { speed: 1.1, phase: 3 * Math.PI / 2 });
+        createObstacle({x: roomWidth, y: tileHeight, z: 2}, {x: 0, y: tileHeight/2, z: tilesSectionZ}, {}); // Start platform
+        createObstacle({x: roomWidth, y: tileHeight, z: 2}, {x: 0, y: tileHeight/2, z: -360}, {}); // End platform
+
+        // Laser Grid Maze
+        createSectionFloor(-368, 42, laserGridFloorTexture);
+        createObstacle({x: 5, y: 1.5, z: 0.1}, {x: 0, y: 4.0, z: -370}, { texture: laserSignTexture });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: -2.6, y: 2.75, z: -370}, { color: 0x8b4513 });
+        createObstacle({x: 0.2, y: 5.5, z: 0.2}, {x: 2.6, y: 2.75, z: -370}, { color: 0x8b4513 });
+        
+        const createLaser = (startPos, size, moveVector, { speed, phase }) => {
+            const laserColors = [0xff0000, 0xffd700, 0x00ff00]; // Red, Golden, Green
+            const color = laserColors[Math.floor(Math.random() * laserColors.length)];
+
+            const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+            const material = new THREE.MeshBasicMaterial({ color });
+            material.toneMapped = false;
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(startPos);
+            scene.add(mesh);
+            geometry.computeBoundingBox();
+
+            const light = new THREE.PointLight(color, 5.0, 4.0);
+            scene.add(light);
+
+            movingObstacles.push({
+                mesh,
+                bbox: new THREE.Box3(),
+                restartKey: 'lasers',
+                type: 'laser',
+                startPos: startPos.clone(),
+                moveVector: moveVector.clone(),
+                speed,
+                phase,
+                light
+            });
+            return mesh;
+        };
+        
+        // Lasers
+        const laserSectionZ = -375;
+        // Horizontal (crawl under)
+        createLaser(new THREE.Vector3(0, 1.5, laserSectionZ - 5), new THREE.Vector3(roomWidth, 0.1, 0.1), new THREE.Vector3(0, -1.0, 0), { speed: 1.0, phase: 0 });
+        // Vertical (time movement)
+        createLaser(new THREE.Vector3(-3, 2, laserSectionZ - 12), new THREE.Vector3(0.1, 4, 0.1), new THREE.Vector3(6, 0, 0), { speed: 1.25, phase: Math.PI });
+        // Horizontal (crawl under, faster)
+        createLaser(new THREE.Vector3(0, 0.5, laserSectionZ - 19), new THREE.Vector3(roomWidth, 0.1, 0.1), new THREE.Vector3(0, 1.5, 0), { speed: 1.56, phase: 0.5 });
+        // Two vertical lasers creating a gap
+        createLaser(new THREE.Vector3(-4, 2, laserSectionZ - 26), new THREE.Vector3(0.1, 4, 0.1), new THREE.Vector3(2, 0, 0), { speed: 1.95, phase: 0 });
+        createLaser(new THREE.Vector3(4, 2, laserSectionZ - 26), new THREE.Vector3(0.1, 4, 0.1), new THREE.Vector3(-2, 0, 0), { speed: 2.44, phase: 0 });
+        // Final fast horizontal laser
+        createLaser(new THREE.Vector3(0, 1.8, laserSectionZ - 33), new THREE.Vector3(roomWidth, 0.1, 0.1), new THREE.Vector3(0, -1.5, 0), { speed: 3.05, phase: Math.PI / 2 });
+
+
+        // Final Floor Area
+        const finalFloorStartZ = -410;
+        const roomEndZ = -420;
+        const finalFloorLength = Math.abs(roomEndZ - finalFloorStartZ);
+        const finalFloorGeometry = new THREE.PlaneGeometry(roomWidth, finalFloorLength);
+        const finalFloorTexture = textureLoader.load('https://ik.imagekit.io/jgam2ldzm/images%20(4).jpeg?updatedAt=1757210441460');
+        finalFloorTexture.wrapS = THREE.RepeatWrapping;
+        finalFloorTexture.wrapT = THREE.RepeatWrapping;
+        finalFloorTexture.repeat.set(4, 2);
+        const finalFloorMaterial = new THREE.MeshLambertMaterial({ map: finalFloorTexture });
+        const finalFloor = new THREE.Mesh(finalFloorGeometry, finalFloorMaterial);
+        finalFloor.rotation.x = -Math.PI / 2;
+        finalFloor.position.set(0, 0.01, finalFloorStartZ - finalFloorLength / 2);
+        finalFloor.receiveShadow = true;
+        scene.add(finalFloor);
+
+        // Room Enclosure
+        const roomWallHeight = 10;
+        const boundaryWallTextureUrl = 'https://ik.imagekit.io/jgam2ldzm/images%20(3).jpeg?updatedAt=1757208609897';
+        createObstacle({x: 12, y: roomWallHeight, z: 0.5}, {x: 0, y: roomWallHeight/2, z: 8}, { textureUrl: boundaryWallTextureUrl, textureRepeat: { x: 3, y: 1.5 } });
+        createObstacle({x: 12, y: roomWallHeight, z: 0.5}, {x: 0, y: roomWallHeight/2, z: roomEndZ}, { textureUrl: boundaryWallTextureUrl, textureRepeat: { x: 3, y: 1.5 } });
+        const sideWallLength = Math.abs(roomEndZ - 8);
+        createObstacle({x: 0.5, y: roomWallHeight, z: sideWallLength}, {x: -6, y: roomWallHeight/2, z: 8 - sideWallLength/2 }, { textureUrl: boundaryWallTextureUrl, textureRepeat: { x: 50, y: 1.5 } });
+        createObstacle({x: 0.5, y: roomWallHeight, z: sideWallLength}, {x: 6, y: roomWallHeight/2, z: 8 - sideWallLength/2 }, { textureUrl: boundaryWallTextureUrl, textureRepeat: { x: 50, y: 1.5 } });
+
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+        let pushTimer = 0; // Timer to track knockback duration
+        const PUSH_DURATION = 0.5; // How long knockback affects player control
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            
+            if (pushTimer > 0) {
+                pushTimer -= delta;
+            }
+            
+            let isClimbing = false;
+            
+            // Animate moving obstacles
+            const sweeperSpeed = 0.75;
+            rotatingCrossGroup1.rotation.y += sweeperSpeed * delta;
+            rotatingCrossGroup2.rotation.y -= sweeperSpeed * 1.2 * delta; // Rotates opposite and faster
+            const windmillSpeed = 1.0;
+            windmill1.rotation.z += windmillSpeed * delta;
+            windmill2.rotation.z -= windmillSpeed * 1.3 * delta;
+
+            // Animate pistons and lasers
+            for (const moving of movingObstacles) {
+                if (moving.type === 'piston' || moving.type === 'laser') {
+                    const sineWave = 0.5 * Math.sin(clock.getElapsedTime() * moving.speed + moving.phase) + 0.5; // Ranges from 0 to 1
+                    moving.mesh.position.copy(moving.startPos).addScaledVector(moving.moveVector, sineWave);
+                    if(moving.light) {
+                        moving.light.position.copy(moving.mesh.position);
+                    }
+                }
+            }
+
+            // Animate moving platforms
+            let playerOnPlatformDelta = new THREE.Vector3(0,0,0);
+            for (const platform of movingPlatforms) {
+                platform.lastPosition.copy(platform.obstacleRef.mesh.position);
+                const sineWave = 0.5 * Math.sin(clock.getElapsedTime() * platform.speed + platform.phase) + 0.5;
+                const newPosition = platform.startPos.clone().addScaledVector(platform.moveVector, sineWave);
+                platform.obstacleRef.mesh.position.copy(newPosition);
+                platform.obstacleRef.bbox.setFromObject(platform.obstacleRef.mesh);
+                
+                const platformMoveDelta = newPosition.clone().sub(platform.lastPosition);
+                
+                // Check if player is on this platform
+                const groundCheckBBox = playerBBox.clone();
+                groundCheckBBox.min.y -= 0.1; // Check slightly below the player
+                 if (isGrounded && groundCheckBBox.intersectsBox(platform.obstacleRef.bbox)) {
+                    playerOnPlatformDelta.copy(platformMoveDelta);
+                }
+            }
+            player.position.add(playerOnPlatformDelta);
+
+            // Force an update of the world matrix for the group and all its children (the arms).
+            // This is crucial for getting the correct bounding box in world space before collision checks.
+            rotatingCrossGroup1.updateMatrixWorld(true);
+            rotatingCrossGroup2.updateMatrixWorld(true);
+            windmill1.updateMatrixWorld(true);
+            windmill2.updateMatrixWorld(true);
+            for (const moving of movingObstacles) {
+                if (moving.type === 'piston' || moving.type === 'laser') {
+                    moving.mesh.updateMatrixWorld(true);
+                }
+            }
+
+            // Update fireworks
+            for (let i = activeFireworks.length - 1; i >= 0; i--) {
+                const firework = activeFireworks[i];
+                let allParticlesDead = true;
+
+                for (let j = firework.particles.length - 1; j >= 0; j--) {
+                    const p = firework.particles[j];
+                    if (p.lifetime > 0) {
+                        allParticlesDead = false;
+                        p.lifetime -= delta;
+
+                        p.velocity.y += gravity * 0.3 * delta; // Gentle gravity
+                        p.mesh.position.add(p.velocity.clone().multiplyScalar(delta));
+
+                        // Fade out
+                        p.mesh.material.opacity = Math.max(0, p.lifetime / p.initialLifetime);
+
+                        if (p.lifetime <= 0) {
+                            firework.group.remove(p.mesh);
+                        }
+                    }
+                }
+
+                if (allParticlesDead) {
+                    firework.particles.forEach(p => { // Dispose of resources
+                        p.mesh.geometry.dispose();
+                        p.mesh.material.dispose();
+                    });
+                    scene.remove(firework.group);
+                    activeFireworks.splice(i, 1);
+                }
+            }
+
+
+            // --- State Transitions ---
+            if (keys['KeyE']) { // Grab/Let Go Monkey Bars
+                if (isHanging) isHanging = false;
+                else {
+                    const cameraDirection = new THREE.Vector3();
+                    camera.getWorldDirection(cameraDirection);
+                    const cameraPosition = new THREE.Vector3();
+                    camera.getWorldPosition(cameraPosition);
+                    const grabCheckRay = new THREE.Raycaster(cameraPosition, cameraDirection, 0, 3.0);
+                    const grabbableMeshes = obstacles.filter(o => o.grabbable).map(o => o.mesh);
+                    const grabIntersects = grabCheckRay.intersectObjects(grabbableMeshes);
+                    if (grabIntersects.length > 0) {
+                        isHanging = true;
+                        const bar = grabIntersects[0].object;
+                        player.position.y = bar.position.y - camera.position.y - 0.2; 
+                        player.position.x = grabIntersects[0].point.x;
+                        let closestBarZ = 0;
+                        let minDistance = Infinity;
+                        for (let i = 0; i < numBars; i++) {
+                            const currentBarZ = monkeyBarsStartZ - (i * barSpacing);
+                            const distance = Math.abs(grabIntersects[0].point.z - currentBarZ);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestBarZ = currentBarZ;
+                            }
+                        }
+                        player.position.z = closestBarZ;
+                        playerVelocity.set(0, 0, 0);
+                    }
+                }
+                keys['KeyE'] = false;
+            }
+
+            // --- Main Player State Machine ---
+            if (isHanging) {
+                // HANGING STATE
+                playerVelocity.set(0, 0, 0);
+                let hangMoveX = 0;
+                if (keys['KeyA']) hangMoveX -= 1;
+                if (keys['KeyD']) hangMoveX += 1;
+                player.position.x += hangMoveX * speedRef.current * 0.5 * delta;
+                const cameraDirection = new THREE.Vector3();
+                camera.getWorldDirection(cameraDirection);
+                const isLookingForward = cameraDirection.z < 0;
+                if (keys['KeyW'] || keys['KeyS']) {
+                    const lungeDirection = (keys['KeyW'] ? (isLookingForward ? -1 : 1) : (isLookingForward ? 1 : -1));
+                    const targetZ = player.position.z + (lungeDirection * barSpacing);
+                    const isInsideBounds = targetZ <= monkeyBarsBBox.max.z + barSpacing / 2 && targetZ >= monkeyBarsBBox.min.z - barSpacing / 2;
+                    if (isInsideBounds) {
+                        player.position.z = targetZ;
+                    } else {
+                        isHanging = false;
+                        camera.getWorldDirection(cameraDirection);
+                        cameraDirection.y = 0;
+                        cameraDirection.normalize();
+                        playerVelocity.x = cameraDirection.x * speedRef.current * 0.75;
+                        playerVelocity.z = cameraDirection.z * speedRef.current * 0.75;
+                        playerVelocity.y = 4.0;
+                        isGrounded = false;
+                    }
+                    keys['KeyW'] = false; keys['KeyS'] = false;
+                }
+                leftHand.position.set(-0.3, 0.15, -0.5);
+                leftHand.rotation.x = -1.5;
+                rightHand.position.set(0.3, 0.15, -0.5);
+                rightHand.rotation.x = -1.5;
+                const playerXZPos = new THREE.Vector3(player.position.x, monkeyBarsBBox.getCenter(new THREE.Vector3()).y, player.position.z);
+                if (!monkeyBarsBBox.containsPoint(playerXZPos)) isHanging = false; 
+            } else {
+                // GROUND/AIR/CLIMB STATE
+                leftHand.position.set(-0.4, -0.3, -0.7);
+                leftHand.rotation.x = 0;
+                rightHand.position.set(0.4, -0.3, -0.7);
+                rightHand.rotation.x = 0;
+                
+                if (pushTimer <= 0) { // Player has control
+                    const moveDirection = new THREE.Vector3();
+                    if (keys['KeyW'] && isOnWall) {
+                        const forwardJumpVector = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion);
+                        playerVelocity.x = forwardJumpVector.x * speedRef.current;
+                        playerVelocity.z = forwardJumpVector.z * speedRef.current;
+                        playerVelocity.y = 5.0;
+                        isGrounded = false; isOnWall = false;
+                    } else { // Regular ground/air movement
+                        if (keys['KeyW']) moveDirection.z -= 1; 
+                        if (keys['KeyS']) moveDirection.z += 1;
+                        if (keys['KeyA']) moveDirection.x -= 1;
+                        if (keys['KeyD']) moveDirection.x += 1;
+                        
+                        if (moveDirection.length() > 0) {
+                            moveDirection.normalize();
+                            moveDirection.applyQuaternion(player.quaternion);
+                            playerVelocity.x = moveDirection.x * speedRef.current;
+                            playerVelocity.z = moveDirection.z * speedRef.current;
+                        } else {
+                            playerVelocity.x = 0; playerVelocity.z = 0;
+                        }
+                    }
+                } else { // Player is being knocked back, apply air drag
+                    const drag = 0.985;
+                    playerVelocity.x *= drag;
+                    playerVelocity.z *= drag;
+                }
+                
+                if (keys['Space'] && isGrounded) playerVelocity.y = 6.0;
+                if (keys['KeyQ']) {
+                    if (!isCrawling) { isCrawling = true; playerSize.y = playerCrawlHeight; camera.position.y = playerCrawlHeight / 2; }
+                } else if (isCrawling) { isCrawling = false; playerSize.y = playerHeight; camera.position.y = 1.6; }
+                
+                const frontVector = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion);
+                const raycaster = new THREE.Raycaster(player.position, frontVector, 0, 0.6);
+                const climbableMeshes = obstacles.filter(o => o.climbable).map(o => o.mesh);
+                const wallIntersects = raycaster.intersectObjects(climbableMeshes);
+
+                if (keys['KeyC']) {
+                    if (wallIntersects.length > 0) { // Wall climbing
+                        isClimbing = true;
+                        const wallObstacle = obstacles.find(o => o.mesh === wallIntersects[0].object);
+                        const wallTopY = wallObstacle.bbox.max.y;
+                        const playerHeadY = player.position.y + playerSize.y / 2;
+                        if (playerHeadY < wallTopY) {
+                            playerVelocity.y = 2.0; playerVelocity.x = 0; playerVelocity.z = 0;
+                        } else {
+                            player.position.y = wallTopY + (playerSize.y / 2);
+                            player.position.add(frontVector.clone().multiplyScalar(playerSize.z));
+                            playerVelocity.y = 0; isGrounded = true; isOnWall = true; keys['KeyC'] = false;
+                        }
+                    }
+                         keys['KeyC'] = false;
+                }
+            }
+
+            // --- Physics and Collision ---
+            // Apply gravity if not climbing or hanging
+                if (!isClimbing && !isHanging) playerVelocity.y += gravity * delta;
+            
+            const futurePosition = player.position.clone();
+            futurePosition.x += playerVelocity.x * delta;
+            futurePosition.z += playerVelocity.z * delta;
+
+            const tempPlayerBBox = new THREE.Box3();
+            tempPlayerBBox.copy(playerBBox).translate(new THREE.Vector3(futurePosition.x - player.position.x, 0, 0));
+            let collisionX = false;
+            for (const obstacle of obstacles) {
+                if (tempPlayerBBox.intersectsBox(obstacle.bbox)) { collisionX = true; break; }
+            }
+            if (!collisionX) player.position.x = futurePosition.x;
+
+            tempPlayerBBox.copy(playerBBox).translate(new THREE.Vector3(0, 0, futurePosition.z - player.position.z));
+            let collisionZ = false;
+            for (const obstacle of obstacles) {
+                if (tempPlayerBBox.intersectsBox(obstacle.bbox)) {
+                    const playerMovementZ = futurePosition.z - player.position.z;
+
+                    if (obstacle.isEntryWall) {
+                        // Only collide if player is moving forwards (-z) into the area
+                        if (playerMovementZ < 0) { collisionZ = true; break; }
+
+                    } else if (obstacle.isExitWall) {
+                        // Only collide if player is moving backwards (+z) into the area
+                        if (playerMovementZ > 0) { collisionZ = true; break; }
+
+                    } else {
+                        // Regular obstacle collision
+                        collisionZ = true;
+                        break;
+                    }
+                }
+            }
+            if (!collisionZ) player.position.z = futurePosition.z;
+            
+            player.position.y += playerVelocity.y * delta;
+            
+            isGrounded = false;
+            let currentlyOnAWall = false;
+            updatePlayerBBox();
+            
+            // --- Completion Zone Check ---
+            for (const zone of completionZones) {
+                if (!zone.completed && playerBBox.intersectsBox(zone.bbox)) {
+                    zone.completed = true;
+                    // Trigger firework slightly in front and above the player
+                    const fireworkPosition = player.position.clone();
+                    fireworkPosition.y += 2.0;
+                    const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion);
+                    fireworkPosition.add(forwardVector.multiplyScalar(3));
+                    createFirework(fireworkPosition);
+
+                    if (zone.isFinal) {
+                        setIsCourseComplete(true);
+                        document.exitPointerLock();
+                    }
+                }
+            }
+
+            // --- Moving Obstacle Collision ---
+            for (const moving of movingObstacles) {
+                // The matrixWorld is now guaranteed to be up-to-date thanks to parent group's updateMatrixWorld(true) call above.
+                moving.bbox.copy(moving.mesh.geometry.boundingBox).applyMatrix4(moving.mesh.matrixWorld); // Update bbox to world space
+
+                if (playerBBox.intersectsBox(moving.bbox)) {
+                    // Reset the player to the start of the corresponding sweeper obstacle
+                    const restartPosition = teleportLocations[moving.restartKey];
+                    if (restartPosition) {
+                        player.position.copy(restartPosition);
+                        playerVelocity.set(0, 0, 0); // Stop all movement
+                    }
+                    isGrounded = true; // Set to grounded to avoid falling through floor on teleport
+                    pushTimer = 0; // Cancel any existing knockback
+                    break; // Exit the loop after handling collision
+                }
+            }
+
+            for (const obstacle of obstacles) {
+                if (playerBBox.intersectsBox(obstacle.bbox)) {
+                     const overlapY = playerBBox.min.y - obstacle.bbox.max.y;
+                     if(playerVelocity.y <= 0 && Math.abs(overlapY) < 0.25) {
+                         player.position.y -= overlapY;
+                         playerVelocity.y = 0;
+                         isGrounded = true;
+                         if (obstacle.climbable) currentlyOnAWall = true;
+                         break;
+                     } else if (playerVelocity.y > 0) {
+                        const upwardOverlap = playerBBox.max.y - obstacle.bbox.min.y;
+                         if (upwardOverlap > 0) { player.position.y -= upwardOverlap; playerVelocity.y = 0; }
+                     }
+                }
+            }
+            
+            // Water collision
+            for (const water of waterZones) {
+                if (playerBBox.intersectsBox(water.bbox)) {
+                     const restartPosition = teleportLocations[water.restartKey];
+                     if (restartPosition) {
+                         player.position.copy(restartPosition);
+                         playerVelocity.set(0, 0, 0);
+                     }
+                     isGrounded = true;
+                     break;
+                }
+            }
+
+
+            if (!isHanging) isOnWall = currentlyOnAWall;
+
+            if (player.position.y < playerSize.y / 2) {
+                player.position.y = playerSize.y / 2;
+                playerVelocity.y = 0;
+                isGrounded = true;
+            }
+
+            spaceJustPressed = false; // Consume the space press at the end of the frame
+            renderer.render(scene, camera);
+        };
+        animate();
+
+        // --- Cleanup and Resize ---
+        const onResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+        window.addEventListener('resize', onResize);
+
+        // Capture the specific canvas element for cleanup
+        const canvasElement = renderer.domElement;
+
+        return () => {
+            window.removeEventListener('resize', onResize);
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('keyup', onKeyUp);
+            document.removeEventListener('mousemove', onMouseMove);
+            // FIX: More robust cleanup to prevent DOMException in React Strict Mode
+            if (mountNode && mountNode.contains(canvasElement)) {
+               mountNode.removeChild(canvasElement);
+            }
+            // Dispose of the renderer to free up GPU resources
+            renderer.dispose();
+        };
+    }, []);
+
+    return (
+        <div ref={mountRef} className="w-full h-screen cursor-pointer">
+            {/* Completion Screen */}
+            {isCourseComplete && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-white font-sans z-30">
+                    <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg animate-pulse">
+                        <h1 className="text-5xl font-bold mb-4 text-yellow-400">Bingo!</h1>
+                        <p className="text-2xl mb-8">You Completed The Obstacle Course!</p>
+                        <button
+                            onClick={() => {
+                                teleportRef.current('walls');
+                                setIsCourseComplete(false);
+                            }}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition"
+                        >
+                            Run Again
+                        </button>
+                    </div>
+                </div>
+            )}
+            {/* Sidebar */}
+            <div className={`absolute top-0 left-0 h-full bg-gray-900 bg-opacity-80 text-white p-4 transform transition-transform duration-300 ease-in-out z-10 w-64 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <h2 className="text-2xl font-bold mb-4">Obstacles</h2>
+                <ul className="space-y-2">
+                    <li><button onClick={() => teleportRef.current('walls')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Climbing Walls</button></li>
+                    <li><button onClick={() => teleportRef.current('tunnels')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Tunnels</button></li>
+                    <li><button onClick={() => teleportRef.current('bars')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Monkey Bars</button></li>
+                    <li><button onClick={() => teleportRef.current('hurdles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Hurdles</button></li>
+                    <li><button onClick={() => teleportRef.current('sweepers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Sweepers</button></li>
+                    <li><button onClick={() => teleportRef.current('windmills')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Windmills</button></li>
+                    <li><button onClick={() => teleportRef.current('pistons')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Pistons</button></li>
+                    <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
+                    <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
+                </ul>
+            </div>
+
+            {/* Sidebar Toggle Button */}
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
+                {isSidebarOpen ? (
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                )}
+            </button>
+            <button onClick={() => setPage('main')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
+
+            {!isLocked && !isCourseComplete && (
+                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white font-sans">
+                    <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg">
+                        <h1 className="text-4xl font-bold mb-4">3D Obstacle Training</h1>
+                        <p className="text-xl mb-6">Click to start</p>
+                        <div className="text-left inline-block">
+                           <p><strong className="w-20 inline-block">W,A,S,D:</strong> Move</p>
+                           <p><strong className="w-20 inline-block">Mouse:</strong> Look</p>
+                           <p><strong className="w-20 inline-block">Space:</strong> Jump</p>
+                           <p><strong className="w-20 inline-block">C:</strong> Climb</p>
+                           <p><strong className="w-20 inline-block">Q:</strong> Crawl</p>
+                           <p><strong className="w-20 inline-block">E:</strong> Grab / Hang</p>
+                           <p><strong className="w-20 inline-block">Up/Down:</strong> Speed</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white text-4xl font-bold">+</div>
+            
+            <div className="absolute bottom-4 right-4 bg-gray-800 bg-opacity-75 text-white p-3 rounded-lg shadow-lg text-center font-sans">
+                <button onClick={() => setIsMuted(prev => !prev)} className="mb-2 p-2 rounded-full hover:bg-gray-700 transition focus:outline-none">
+                     {isMuted ? (
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                         </svg>
+                     ) : (
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                         </svg>
+                     )}
+                </button>
+                <p className="font-bold">Speed: {speed.toFixed(1)}</p>
+            </div>
+        </div>
+    );
+}
 
 const SignupPage = ({ setPage }) => {
     const [formData, setFormData] = useState({ fullName: '', email: '', serviceNumber: '', password: '' });
@@ -636,6 +1850,7 @@ const Dashboard = ({ setPage, setTopicId, userData }) => {
 
     const dateString = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const quickAccessItems = [
+        { page: 'obstacleCourse', icon: ToyBrick, title: 'Obstacle Course', color: 'yellow' },
         { page: 'rifleSimulator', icon: Puzzle, title: 'Rifle Simulator', color: 'blue' },
         { page: 'shootingSimulator', icon: Crosshair, title: 'Shooting Range', color: 'green' },
         { page: 'mapChallenge', icon: Map, title: 'Map Reading', color: 'orange' },
@@ -6274,6 +7489,7 @@ export default function App() {
             case 'knotTyingGuide': return <KnotTyingGuide setPage={setPage} />;
             case 'firstAidSimulator': return <FirstAidSimulator setPage={setPage} />;
             case 'uniformGuide': return <UniformGuide setPage={setPage} />;
+            case 'obstacleCourse': return <ObstacleCourseGame setPage={setPage} />;
             case 'rankStructure': return <RankStructureGuide setPage={setPage} />;
             
             // --- Integrated Drill Guide & Checkers ---
@@ -6286,6 +7502,18 @@ export default function App() {
             default: return <Dashboard setPage={setPage} setTopicId={setTopicId} userData={userData} />;
         }
     };
+
+    const fullScreenPages = [
+        'obstacleCourse',
+        'rifleSimulator',
+        'shootingSimulator',
+        'mapChallenge',
+    ];
+    const isFullScreenPage = fullScreenPages.includes(page);
+
+    if (isFullScreenPage) {
+        return renderPage();
+    }
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 font-sans">
