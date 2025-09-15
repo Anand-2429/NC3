@@ -3531,6 +3531,10 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
 
         setTestState('submitted');
 
+        if (document.fullscreenElement) {
+    document.exitFullscreen();
+}
+
         let score = 0;
         let correctAnswers = 0;
         let incorrectAnswers = 0;
@@ -3705,11 +3709,32 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
             }
         };
 
+    //     const handleFullscreenChange = () => {
+    //     if (!document.fullscreenElement && testState === 'in-progress') {
+    //         setDemerits(prev => {
+    //             const newDemerits = prev + 1;
+    //             if (newDemerits >= 3) {
+    //                submitTestRef.current();
+    //             }
+    //             return newDemerits;
+    //         });
+    //     }
+    // };
+
+    const handleFullscreenChange = () => {
+    if (!document.fullscreenElement && testState === 'in-progress') {
+        // Directly call the function to submit the test
+        submitTestRef.current();
+    }
+};
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
 
         return () => {
             clearInterval(timerInterval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, [testState]);
     
@@ -3746,8 +3771,13 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
     }, [currentQIndex, questions]);
 
     const handleStartTest = async () => {
+    try {
+        await document.documentElement.requestFullscreen();
         setTestState('in-progress');
-    };
+    } catch (err) {
+        setFullscreenError('Fullscreen is required. Please enable it in your browser and try again.');
+    }
+};
     
     const handleAnswerSelect = (qIndex, optIndex) => {
         setAnswers(prev => ({...prev, [qIndex]: optIndex}));
@@ -8955,9 +8985,9 @@ export default function App() {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 font-sans">
-            <Header setPage={setPage} user={user} setUser={setUser} userData={userData} theme={theme} toggleTheme={toggleTheme} />
+            {page !== 'proctoredTest' && <Header setPage={setPage} user={user} setUser={setUser} userData={userData} theme={theme} toggleTheme={toggleTheme} />}
             <main className="flex-grow">{renderPage()}</main>
-            {user && user.emailVerified && <Footer />}
+            {page !== 'proctoredTest' && user && user.emailVerified && <Footer />}
         </div>
     );
 }
