@@ -3520,6 +3520,7 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
     const [answers, setAnswers] = useState({});
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [demerits, setDemerits] = useState(0);
     const [loading, setLoading] = useState(true);
     const [fullscreenError, setFullscreenError] = useState('');
@@ -3884,6 +3885,13 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
                         <Clock className="w-6 h-6" />
                         <span>{formatTime(timeLeft)}</span>
                     </div>
+                    <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-1 md:hidden"
+            aria-label="Open question navigation"
+        >
+            <Menu className="w-6 h-6 dark:text-white" />
+        </button>
                 </div>
             </header>
             <div className="flex-grow flex overflow-hidden">
@@ -3902,20 +3910,45 @@ const ProctoredTestPage = ({ setPage, examId, testId, setLastTestResult }) => {
                         }
                     </div>
                 </main>
-                <aside className="w-64 border-l dark:border-gray-700 p-4 flex flex-col">
-                    <h3 className="font-bold mb-4 dark:text-white">Questions</h3>
-                    <div className="grid grid-cols-5 gap-2 flex-grow overflow-y-auto">
-                        {questions.map((_, index) => (
-                            <button key={index} onClick={() => setCurrentQIndex(index)} className={`w-10 h-10 rounded flex items-center justify-center font-bold ${index === currentQIndex ? 'bg-blue-500 text-white ring-2 ring-offset-2 ring-blue-500' : answers[index] !== undefined ? 'bg-green-200 dark:bg-green-800' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                                {index + 1}
-                            </button>
-                        ))}
-                    </div>
-                    <button onClick={handleSubmitTest} className="w-full mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg flex items-center justify-center">
-                        <Power className="w-5 h-5 mr-2" />
-                        Finish & Submit
-                    </button>
-                </aside>
+                {/* Overlay for mobile, closes sidebar on click */}
+{isSidebarOpen && (
+    <div
+        onClick={() => setIsSidebarOpen(false)}
+        className="fixed inset-0 bg-black/60 z-10 md:hidden"
+        aria-hidden="true"
+    ></div>
+)}
+
+{/* Updated Sidebar */}
+<aside className={`
+    fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 flex flex-col z-20
+    transform transition-transform duration-300 ease-in-out
+    ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+    md:static md:h-auto md:translate-x-0 md:z-auto
+`}>
+    {/* Sidebar Header with Close Button */}
+    <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold dark:text-white">Questions</h3>
+        <button onClick={() => setIsSidebarOpen(false)} className="p-1 md:hidden" aria-label="Close question navigation">
+            <X className="w-6 h-6 dark:text-white"/>
+        </button>
+    </div>
+
+    {/* Question Grid */}
+    <div className="grid grid-cols-5 gap-2 flex-grow overflow-y-auto">
+        {questions.map((_, index) => (
+            <button key={index} onClick={() => { setCurrentQIndex(index); setIsSidebarOpen(false); }} className={`w-10 h-10 rounded flex items-center justify-center font-bold ${index === currentQIndex ? 'bg-blue-500 text-white ring-2 ring-offset-2 ring-blue-500 ring-offset-white dark:ring-offset-gray-800' : answers[index] !== undefined ? 'bg-green-200 dark:bg-green-800' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                {index + 1}
+            </button>
+        ))}
+    </div>
+
+    {/* Finish Button */}
+    <button onClick={handleSubmitTest} className="w-full mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg flex items-center justify-center">
+        <Power className="w-5 h-5 mr-2" />
+        Finish & Submit
+    </button>
+</aside>
             </div>
         </div>
     );
