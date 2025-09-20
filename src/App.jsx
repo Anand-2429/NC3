@@ -1091,7 +1091,7 @@ const ObstacleCourseGame = ({ setPage }) => {
                     <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
                     <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
                 </ul>
-                <button onClick={() => setPage('main')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
+                <button onClick={() => setPage('dashboard')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
             </div>
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
                 {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
@@ -4515,7 +4515,7 @@ function RifleSimulator({ setPage }) {
                             {getFeedbackMessage()}
                         </p>
                     </div>
-                    <button onClick={() => setPage('main')} className="pointer-events-auto px-4 py-2 bg-gray-600 rounded-md hover:bg-gray-700 text-white font-semibold transition-all shadow-lg">Back</button>
+                    <button onClick={() => setPage('dashboard')} className="pointer-events-auto px-4 py-2 bg-gray-600 rounded-md hover:bg-gray-700 text-white font-semibold transition-all shadow-lg">Back</button>
                 </div>
 
                 <div className="w-full flex flex-col items-center gap-4 pointer-events-auto">
@@ -5178,7 +5178,7 @@ function Sidebar({ selectedSkill, setSelectedSkill, setMode, resetMission, setPa
             <MissionIcon className="w-6 h-6 flex-shrink-0" />
             <span className={`ml-2 ${(expanded ? '' : 'md:hidden')}`}>Start Mission</span>
           </button>
-          <button onClick={() => setPage('main')} className="w-full flex items-center justify-center p-3 rounded-md text-sm font-bold text-gray-300 hover:bg-gray-600 hover:text-white transition-colors">
+          <button onClick={() => setPage('dashboard')} className="w-full flex items-center justify-center p-3 rounded-md text-sm font-bold text-gray-300 hover:bg-gray-600 hover:text-white transition-colors">
             <BackIcon className="w-6 h-6 flex-shrink-0" />
             <span className={`ml-2 ${(expanded ? '' : 'md:hidden')}`}>Back to Menu</span>
           </button>
@@ -6676,7 +6676,7 @@ function KnotTyingGuide({ setPage }) {
         currentPageKey={currentPageKey}
         onNavigateToIndex={navigateToIndex}
         onClose={() => setIsSidebarOpen(false)}
-        onBack={() => setPage('main')} // Example: navigates back to 'mainMenu'
+        onBack={() => setPage('dashboard')} // Example: navigates back to 'mainMenu'
       />
       
       {/* This overlay will cover the content when the sidebar is open */}
@@ -8529,6 +8529,31 @@ export default function App() {
             }
         }
     }, []);
+
+    // Tidio visibility control effect (runs whenever the page changes)
+    useEffect(() => {
+        const manageTidioVisibility = () => {
+            if (window.tidioChatApi) {
+                if (page === 'dashboard') {
+                    window.tidioChatApi.show();
+                } else {
+                    window.tidioChatApi.hide();
+                }
+            }
+        };
+
+        // Tidio's API might not be ready immediately.
+        // We add an event listener for when it's ready.
+        document.addEventListener('tidioChat-ready', manageTidioVisibility);
+        
+        // We also call it directly in case the API is already loaded
+        // when the user navigates to a new page.
+        manageTidioVisibility();
+
+        return () => {
+            document.removeEventListener('tidioChat-ready', manageTidioVisibility);
+        };
+    }, [page]); // This effect depends on the 'page' state.
 
     // Firebase authentication and user data effect
     useEffect(() => {
