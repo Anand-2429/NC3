@@ -358,7 +358,6 @@ const ObstacleCourseGame = ({ setPage }) => {
     const [isMobile, setIsMobile] = useState(false);
     const originalViewportRef = useRef(null); // Ref to store original viewport content
 
-
     // Refs for game logic
     const speedRef = useRef(speed);
     const teleportRef = useRef(null);
@@ -1017,11 +1016,18 @@ const ObstacleCourseGame = ({ setPage }) => {
 
         // --- Cleanup and Resize ---
         const onResize = () => {
+            // Ensure the main container always fills the visible screen height
+            const mainContainer = mountRef.current?.parentElement;
+            if (mainContainer) {
+                mainContainer.style.height = `${window.innerHeight}px`;
+            }
+            
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         };
         window.addEventListener('resize', onResize);
+        onResize(); // Call once initially to set the correct size
 
         return () => {
             // --- Restore Original Viewport ---
@@ -1047,7 +1053,7 @@ const ObstacleCourseGame = ({ setPage }) => {
     }, [pointerLockOnClick]);
 
     return (
-        <div className="w-full h-screen overflow-hidden relative game-container">
+        <div className="w-full overflow-hidden relative game-container">
             <style>{`
                 .game-container {
                     touch-action: none;
@@ -1118,7 +1124,7 @@ const ObstacleCourseGame = ({ setPage }) => {
                     <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
                     <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
                 </ul>
-                <button onClick={() => setPage('dashboard')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
+                <button onClick={() => setPage('main')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
             </div>
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
                 {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
