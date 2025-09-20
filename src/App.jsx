@@ -356,6 +356,8 @@ const ObstacleCourseGame = ({ setPage }) => {
     const [speed, setSpeed] = useState(5.0);
     const [isCourseComplete, setIsCourseComplete] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const originalViewportRef = useRef(null); // Ref to store original viewport content
+
 
     // Refs for game logic
     const speedRef = useRef(speed);
@@ -458,6 +460,23 @@ const ObstacleCourseGame = ({ setPage }) => {
 
     // Main effect for game setup and animation loop
     useEffect(() => {
+        // --- Viewport Manipulation for Desktop View Simulation on Mobile ---
+        // This simulates the "Request Desktop Site" browser option as requested.
+        // A web app cannot directly control browser settings, but this achieves a similar visual result.
+        const viewportMeta = document.querySelector('meta[name="viewport"]');
+        if (viewportMeta) {
+            originalViewportRef.current = viewportMeta.getAttribute('content');
+            viewportMeta.setAttribute('content', 'width=1280');
+        } else {
+            const newViewportMeta = document.createElement('meta');
+            newViewportMeta.name = 'viewport';
+            newViewportMeta.content = 'width=1280';
+            document.head.appendChild(newViewportMeta);
+            // Store a sensible default to restore to if no viewport was present initially
+            originalViewportRef.current = 'width=device-width, initial-scale=1.0';
+        }
+        // --- End Viewport Manipulation ---
+
         // --- Basic Scene Setup ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb); // Sky blue background
@@ -1005,6 +1024,14 @@ const ObstacleCourseGame = ({ setPage }) => {
         window.addEventListener('resize', onResize);
 
         return () => {
+            // --- Restore Original Viewport ---
+            // This runs when the component unmounts (e.g., user navigates back).
+            const currentViewportMeta = document.querySelector('meta[name="viewport"]');
+            if (currentViewportMeta && originalViewportRef.current) {
+                currentViewportMeta.setAttribute('content', originalViewportRef.current);
+            }
+            // --- End Restore ---
+
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', onResize);
             document.removeEventListener('keydown', onKeyDown);
