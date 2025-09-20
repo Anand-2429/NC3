@@ -1192,8 +1192,8 @@ const ObstacleCourseGame = ({ setPage }) => {
                             <li><button onClick={() => teleportRef.current('pistons')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Pistons</button></li>
                             <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
                             <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
+                            <li><button onClick={handleBackAndExitFullscreen} className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Back to Dashboard</button></li>
                         </ul>
-                        <button onClick={handleBackAndExitFullscreen} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
                     </div>
                     <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
                         {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
