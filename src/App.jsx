@@ -1218,9 +1218,9 @@ const ObstacleCourseGame = ({ setPage }) => {
                     )}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-4xl font-bold z-0 pointer-events-none">+</div>
                     <div className="absolute top-4 right-4 flex items-center gap-2 bg-gray-800 bg-opacity-75 text-white p-3 rounded-lg shadow-lg text-center font-sans z-30 pointer-events-auto">
-                        <button onClick={() => setIsMuted(prev => !prev)} className="p-2 rounded-full hover:bg-gray-700 transition focus:outline-none">
+                        {/* <button onClick={() => setIsMuted(prev => !prev)} className="p-2 rounded-full hover:bg-gray-700 transition focus:outline-none">
                              {isMuted ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg> )}
-                        </button>
+                        </button> */}
                         <div className='flex flex-col items-center'>
                             {isMobile && <button onTouchStart={() => setSpeed(s => Math.min(10.0, s + 1.0))} className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-700 transition focus:outline-none text-2xl font-bold">+</button>}
                             <p className="font-bold whitespace-nowrap">Speed: {speed.toFixed(1)}</p>
