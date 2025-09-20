@@ -264,7 +264,7 @@ const Joystick = ({ controlsRef }) => {
     const baseRef = useRef(null);
     const touchId = useRef(null);
     const center = useRef({ x: 0, y: 0 });
-    const maxDistance = 50; // Max distance the knob can move from the center
+    const maxDistance = 40; // Max distance the knob can move from the center
     const deadZone = 10;   // Distance before movement is registered
 
     const handleTouchStart = (e) => {
@@ -332,7 +332,7 @@ const Joystick = ({ controlsRef }) => {
     return (
         <div
             ref={baseRef}
-            className="w-48 h-48 bg-gray-600 bg-opacity-40 rounded-full flex items-center justify-center pointer-events-auto"
+            className="w-36 h-36 bg-gray-600 bg-opacity-40 rounded-full flex items-center justify-center pointer-events-auto"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -340,7 +340,7 @@ const Joystick = ({ controlsRef }) => {
         >
             <div
                 ref={knobRef}
-                className="w-20 h-20 bg-gray-500 bg-opacity-60 rounded-full transition-transform duration-100"
+                className="w-16 h-16 bg-gray-500 bg-opacity-60 rounded-full transition-transform duration-100"
             ></div>
         </div>
     );
@@ -1022,6 +1022,12 @@ const ObstacleCourseGame = ({ setPage }) => {
     return (
         <div className="w-full h-screen overflow-hidden relative game-container">
             <style>{`
+                .game-container {
+                    touch-action: none;
+                    -webkit-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+                }
                 .landscape-only-message { display: none; }
                 @media (orientation: portrait) {
                   .game-container > *:not(.landscape-only-message) { display: none !important; }
@@ -1087,11 +1093,9 @@ const ObstacleCourseGame = ({ setPage }) => {
                 </ul>
                 <button onClick={() => setPage('main')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
             </div>
-            
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
                 {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
             </button>
-            
             {(!isLocked && !isMobile) && !isCourseComplete && (
                  <div onClick={pointerLockOnClick} className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white font-sans z-30 cursor-pointer">
                     <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg">
