@@ -356,7 +356,19 @@ const ObstacleCourseGame = ({ setPage }) => {
     const [speed, setSpeed] = useState(5.0);
     const [isCourseComplete, setIsCourseComplete] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false); // State to track fullscreen status
     const originalViewportRef = useRef(null); // Ref to store original viewport content
+
+    // New handler for the back button
+    const handleBackAndExitFullscreen = () => {
+        setPage('dashboard'); // Calls the original logic to close sidebar etc.
+        // Exit fullscreen if it's currently active
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(err => {
+                console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+            });
+        }
+    }
 
     // Refs for game logic
     const speedRef = useRef(speed);
@@ -374,6 +386,28 @@ const ObstacleCourseGame = ({ setPage }) => {
     useEffect(() => {
         setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
     }, []);
+
+    // Effect to track and update fullscreen state
+    useEffect(() => {
+        const handleFullScreenChange = () => {
+            const isFs = !!document.fullscreenElement;
+            setIsFullScreen(isFs);
+            // If exiting fullscreen, ensure pointer lock is also released.
+            if (!isFs && document.pointerLockElement) {
+                document.exitPointerLock();
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullScreenChange);
+        handleFullScreenChange(); // Set initial state
+        return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    }, []);
+
+    // Function to request entering fullscreen mode
+    const requestFullScreen = () => {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.warn(`Fullscreen request failed: ${err.message}`);
+        });
+    };
 
     useEffect(() => {
         speedRef.current = speed;
@@ -442,7 +476,7 @@ const ObstacleCourseGame = ({ setPage }) => {
                 lookArea.removeEventListener('touchcancel', handleTouchLookEnd);
             }
         };
-    }, [isMobile, isSidebarOpen]); // Re-run this effect when the sidebar opens/closes
+    }, [isMobile, isSidebarOpen, isFullScreen]); // Re-run this effect when the sidebar opens/closes or fullscreen changes
 
     const pointerLockOnClick = useCallback(() => {
         const currentMount = mountRef.current;
@@ -459,9 +493,13 @@ const ObstacleCourseGame = ({ setPage }) => {
 
     // Main effect for game setup and animation loop
     useEffect(() => {
+        // --- GUARD CLAUSE ---
+        // Only run the setup when in fullscreen mode, as the canvas div won't exist otherwise.
+        if (!isFullScreen) {
+            return;
+        }
+
         // --- Viewport Manipulation for Desktop View Simulation on Mobile ---
-        // This simulates the "Request Desktop Site" browser option as requested.
-        // A web app cannot directly control browser settings, but this achieves a similar visual result.
         const viewportMeta = document.querySelector('meta[name="viewport"]');
         if (viewportMeta) {
             originalViewportRef.current = viewportMeta.getAttribute('content');
@@ -471,11 +509,9 @@ const ObstacleCourseGame = ({ setPage }) => {
             newViewportMeta.name = 'viewport';
             newViewportMeta.content = 'width=1280';
             document.head.appendChild(newViewportMeta);
-            // Store a sensible default to restore to if no viewport was present initially
             originalViewportRef.current = 'width=device-width, initial-scale=1.0';
         }
-        // --- End Viewport Manipulation ---
-
+        
         // --- Basic Scene Setup ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb); // Sky blue background
@@ -484,6 +520,11 @@ const ObstacleCourseGame = ({ setPage }) => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         const currentMount = mountRef.current;
+        
+        // This check is now slightly redundant due to the guard clause, but safe to keep.
+        if (!currentMount) {
+            return;
+        }
         currentMount.appendChild(renderer.domElement);
         
         // --- Audio Setup ---
@@ -673,8 +714,20 @@ const ObstacleCourseGame = ({ setPage }) => {
 
         // --- Controls ---
         const keys = {};
-        const onKeyDown = (event) => { 
+        const onKeyDown = (event) => {
             if (event.code === 'Space') event.preventDefault();
+
+            // New: Pause/Resume with Control key
+            if (event.key === 'Control') {
+                event.preventDefault();
+                const currentMount = mountRef.current;
+                if (document.pointerLockElement === currentMount) {
+                    document.exitPointerLock();
+                } else if(currentMount) {
+                    pointerLockOnClick();
+                }
+            }
+
             keys[event.code] = true; 
             if (event.code === 'ArrowUp') setSpeed(s => Math.min(10.0, s + 1.0));
             if (event.code === 'ArrowDown') setSpeed(s => Math.max(1.0, s - 1.0));
@@ -1043,120 +1096,139 @@ const ObstacleCourseGame = ({ setPage }) => {
             document.removeEventListener('keydown', onKeyDown);
             document.removeEventListener('keyup', onKeyUp);
             document.removeEventListener('mousemove', onMouseMove);
-            currentMount.removeEventListener('click', pointerLockOnClick);
+            if (currentMount) {
+              currentMount.removeEventListener('click', pointerLockOnClick);
+            }
             document.removeEventListener('pointerlockchange', onPointerLockChange);
             
             if (currentMount && renderer.domElement) {
                currentMount.removeChild(renderer.domElement);
             }
         };
-    }, [pointerLockOnClick]);
+    }, [isFullScreen, pointerLockOnClick]);
 
     return (
-        <div className="w-full overflow-hidden relative game-container">
-            <style>{`
-                .game-container {
-                    touch-action: none;
-                    -webkit-user-select: none;
-                    -ms-user-select: none;
-                    user-select: none;
-                }
-                .landscape-only-message { display: none; }
-                @media (orientation: portrait) {
-                  .game-container > *:not(.landscape-only-message) { display: none !important; }
-                  .landscape-only-message {
-                    display: flex;
-                    position: fixed;
-                    inset: 0;
-                    background-color: #111;
-                    color: white;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    font-size: 1.5rem;
-                    z-index: 100;
-                  }
-                }
-            `}</style>
-            <div className="landscape-only-message">
-                <div className="p-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" transform="rotate(90 12 12)"/></svg>
-                    Please rotate your device to landscape mode to play.
+        <div className="w-full h-screen overflow-hidden relative game-container bg-black text-white">
+            {!isFullScreen ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center font-sans z-50 p-4 text-center">
+                    <h1 className="text-4xl font-bold mb-4">Fullscreen Required</h1>
+                    <p className="text-xl mb-8">This game must be played in fullscreen mode.</p>
+                    <button 
+                        onClick={requestFullScreen} 
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition active:scale-95 mb-6"
+                    >
+                        Enter Fullscreen
+                    </button>
+                    <button onClick={() => setPage('dashboard')} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition active:scale-95 mb-6"> Back to Dashboard</button>
                 </div>
-            </div>
-
-            <div ref={mountRef} className="w-full h-full cursor-pointer" id="game-canvas-container"></div>
-            
-            {isMobile && !isSidebarOpen && <div id="look-area" className="absolute top-0 right-0 w-1/2 h-full z-10"></div>}
-
-            {isMobile && !isSidebarOpen && (
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20 pointer-events-none">
-                    <Joystick controlsRef={controlsRef} />
-
-                    <div className="grid grid-cols-2 gap-4 pointer-events-auto">
-                        <ControlButton onTouchStart={() => controlsRef.current.climb = true} onTouchEnd={() => {}}>CLIMB</ControlButton>
-                        <ControlButton onTouchStart={() => controlsRef.current.grab = true} onTouchEnd={() => {}}>GRAB</ControlButton>
-                        <ControlButton onTouchStart={() => controlsRef.current.crawl = true} onTouchEnd={() => controlsRef.current.crawl = false}>CRAWL</ControlButton>
-                        <ControlButton onTouchStart={() => controlsRef.current.jump = true} onTouchEnd={() => controlsRef.current.jump = false}>JUMP</ControlButton>
-                    </div>
-                </div>
-            )}
-            
-            {isCourseComplete && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-white font-sans z-50">
-                    <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg animate-pulse">
-                        <h1 className="text-5xl font-bold mb-4 text-yellow-400">Bingo!</h1>
-                        <p className="text-2xl mb-8">You Completed The Obstacle Course!</p>
-                        <button onClick={() => { teleportRef.current('walls'); setIsCourseComplete(false); }} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition">Run Again</button>
-                    </div>
-                </div>
-            )}
-            <div className={`absolute top-0 left-0 h-full bg-gray-900 bg-opacity-80 text-white p-4 transform transition-transform duration-300 ease-in-out z-40 w-64 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <h2 className="text-2xl font-bold mb-4">Obstacles</h2>
-                <ul className="space-y-2">
-                    <li><button onClick={() => teleportRef.current('walls')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Climbing Walls</button></li>
-                    <li><button onClick={() => teleportRef.current('tunnels')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Tunnels</button></li>
-                    <li><button onClick={() => teleportRef.current('bars')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Monkey Bars</button></li>
-                    <li><button onClick={() => teleportRef.current('hurdles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Hurdles</button></li>
-                    <li><button onClick={() => teleportRef.current('sweepers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Sweepers</button></li>
-                    <li><button onClick={() => teleportRef.current('windmills')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Windmills</button></li>
-                    <li><button onClick={() => teleportRef.current('pistons')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Pistons</button></li>
-                    <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
-                    <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
-                </ul>
-                <button onClick={() => setPage('main')} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
-            </div>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
-                {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
-            </button>
-            {(!isLocked && !isMobile) && !isCourseComplete && (
-                 <div onClick={pointerLockOnClick} className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white font-sans z-30 cursor-pointer">
-                    <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg">
-                        <h1 className="text-4xl font-bold mb-4">3D Obstacle Training</h1>
-                        <p className="text-xl mb-6">Click to start</p>
-                        <div className="text-left inline-block">
-                           <p><strong className="w-20 inline-block">W,A,S,D:</strong> Move</p>
-                           <p><strong className="w-20 inline-block">Mouse:</strong> Look</p>
-                           <p><strong className="w-20 inline-block">Space:</strong> Jump</p>
-                           <p><strong className="w-20 inline-block">C:</strong> Climb</p>
-                           <p><strong className="w-20 inline-block">Q:</strong> Crawl</p>
-                           <p><strong className="w-20 inline-block">E:</strong> Grab</p>
-                           <p><strong className="w-20 inline-block">Up/Down:</strong> Speed</p>
+            ) : (
+                <>
+                    <style>{`
+                        .game-container {
+                            touch-action: none;
+                            -webkit-user-select: none;
+                            -ms-user-select: none;
+                            user-select: none;
+                        }
+                        .landscape-only-message { display: none; }
+                        @media (orientation: portrait) {
+                          .game-container > *:not(.landscape-only-message) { display: none !important; }
+                          .landscape-only-message {
+                            display: flex;
+                            position: fixed;
+                            inset: 0;
+                            background-color: #111;
+                            color: white;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                            font-size: 1.5rem;
+                            z-index: 100;
+                          }
+                        }
+                    `}</style>
+                    <div className="landscape-only-message">
+                        <div className="p-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" transform="rotate(90 12 12)"/></svg>
+                            Please rotate your device to landscape mode to play.
                         </div>
                     </div>
-                </div>
+
+                    <div ref={mountRef} className="w-full h-full cursor-pointer" id="game-canvas-container"></div>
+                    
+                    {isMobile && !isSidebarOpen && <div id="look-area" className="absolute top-0 right-0 w-1/2 h-full z-10"></div>}
+
+                    {isMobile && !isSidebarOpen && (
+                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20 pointer-events-none">
+                            <Joystick controlsRef={controlsRef} />
+
+                            <div className="grid grid-cols-2 gap-4 pointer-events-auto">
+                                <ControlButton onTouchStart={() => controlsRef.current.climb = true} onTouchEnd={() => {}}>CLIMB</ControlButton>
+                                <ControlButton onTouchStart={() => controlsRef.current.grab = true} onTouchEnd={() => {}}>GRAB</ControlButton>
+                                <ControlButton onTouchStart={() => controlsRef.current.crawl = true} onTouchEnd={() => controlsRef.current.crawl = false}>CRAWL</ControlButton>
+                                <ControlButton onTouchStart={() => controlsRef.current.jump = true} onTouchEnd={() => controlsRef.current.jump = false}>JUMP</ControlButton>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {isCourseComplete && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-white font-sans z-50">
+                            <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg animate-pulse">
+                                <h1 className="text-5xl font-bold mb-4 text-yellow-400">Bingo!</h1>
+                                <p className="text-2xl mb-8">You Completed The Obstacle Course!</p>
+                                <button onClick={() => { teleportRef.current('walls'); setIsCourseComplete(false); }} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition">Run Again</button>
+                            </div>
+                        </div>
+                    )}
+                    <div className={`absolute top-0 left-0 h-full bg-gray-900 bg-opacity-80 text-white p-4 transform transition-transform duration-300 ease-in-out z-40 w-64 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <h2 className="text-2xl font-bold mb-4">Obstacles</h2>
+                        <ul className="space-y-2">
+                            <li><button onClick={() => teleportRef.current('walls')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Climbing Walls</button></li>
+                            <li><button onClick={() => teleportRef.current('tunnels')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Tunnels</button></li>
+                            <li><button onClick={() => teleportRef.current('bars')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Monkey Bars</button></li>
+                            <li><button onClick={() => teleportRef.current('hurdles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Hurdles</button></li>
+                            <li><button onClick={() => teleportRef.current('sweepers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Sweepers</button></li>
+                            <li><button onClick={() => teleportRef.current('windmills')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Windmills</button></li>
+                            <li><button onClick={() => teleportRef.current('pistons')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Pistons</button></li>
+                            <li><button onClick={() => teleportRef.current('tiles')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Floating Tiles</button></li>
+                            <li><button onClick={() => teleportRef.current('lasers')} className="w-full text-left p-2 rounded hover:bg-gray-700 transition">Laser Grid</button></li>
+                        </ul>
+                        <button onClick={handleBackAndExitFullscreen} className="absolute left-4 bottom-4 z-20 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all">Back</button>
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`absolute top-4 z-40 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none transition-all duration-300 ease-in-out ${isSidebarOpen ? 'left-64' : 'left-4'}`}>
+                        {isSidebarOpen ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg> )}
+                    </button>
+                    {(!isLocked && !isMobile) && !isCourseComplete && (
+                         <div onClick={pointerLockOnClick} className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white font-sans z-30 cursor-pointer">
+                            <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg">
+                                <h1 className="text-4xl font-bold mb-4">3D Obstacle Training</h1>
+                                <p className="text-xl mb-6">Click or Press Ctrl to resume</p>
+                                <div className="text-left inline-block">
+                                   <p><strong className="w-20 inline-block">W,A,S,D:</strong> Move</p>
+                                   <p><strong className="w-20 inline-block">Mouse:</strong> Look</p>
+                                   <p><strong className="w-20 inline-block">Space:</strong> Jump</p>
+                                   <p><strong className="w-20 inline-block">Ctrl:</strong> Pause</p>
+                                   <p><strong className="w-20 inline-block">C:</strong> Climb</p>
+                                   <p><strong className="w-20 inline-block">Q:</strong> Crawl</p>
+                                   <p><strong className="w-20 inline-block">E:</strong> Grab</p>
+                                   <p><strong className="w-20 inline-block">Up/Down:</strong> Speed</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-4xl font-bold z-0 pointer-events-none">+</div>
+                    <div className="absolute top-4 right-4 flex items-center gap-2 bg-gray-800 bg-opacity-75 text-white p-3 rounded-lg shadow-lg text-center font-sans z-30 pointer-events-auto">
+                        <button onClick={() => setIsMuted(prev => !prev)} className="p-2 rounded-full hover:bg-gray-700 transition focus:outline-none">
+                             {isMuted ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg> )}
+                        </button>
+                        <div className='flex flex-col items-center'>
+                            {isMobile && <button onTouchStart={() => setSpeed(s => Math.min(10.0, s + 1.0))} className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-700 transition focus:outline-none text-2xl font-bold">+</button>}
+                            <p className="font-bold whitespace-nowrap">Speed: {speed.toFixed(1)}</p>
+                            {isMobile && <button onTouchStart={() => setSpeed(s => Math.max(1.0, s - 1.0))} className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-700 transition focus:outline-none text-3xl font-bold">-</button>}
+                        </div>
+                    </div>
+                </>
             )}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-4xl font-bold z-0 pointer-events-none">+</div>
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-gray-800 bg-opacity-75 text-white p-3 rounded-lg shadow-lg text-center font-sans z-30 pointer-events-auto">
-                <button onClick={() => setIsMuted(prev => !prev)} className="p-2 rounded-full hover:bg-gray-700 transition focus:outline-none">
-                     {isMuted ? ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg> ) : ( <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg> )}
-                </button>
-                <div className='flex flex-col items-center'>
-                    {isMobile && <button onTouchStart={() => setSpeed(s => Math.min(10.0, s + 1.0))} className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-700 transition focus:outline-none text-2xl font-bold">+</button>}
-                    <p className="font-bold whitespace-nowrap">Speed: {speed.toFixed(1)}</p>
-                    {isMobile && <button onTouchStart={() => setSpeed(s => Math.max(1.0, s - 1.0))} className="w-10 h-8 flex items-center justify-center rounded-md hover:bg-gray-700 transition focus:outline-none text-3xl font-bold">-</button>}
-                </div>
-            </div>
         </div>
     );
 }
