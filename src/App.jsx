@@ -1645,6 +1645,7 @@ const Dashboard = ({ setPage, setTopicId, setExamId, userData }) => {
         { page: 'knotTyingGuide', icon: KnotIcon, title: 'Knot Tying', color: 'teal' },
         { page: 'firstAidSimulator', icon: HeartPulse, title: 'First-Aid Sim', color: 'red' },
         { page: 'drillGuide', icon: Shield, title: 'Drill Guide', color: 'purple' },
+        { page: 'aiPoseMatcher', icon: Shield, title: 'Poser', color: 'blue' },
         { page: 'eventCalendar', icon: Calendar, title: 'Event Calendar', color: 'indigo' },
         { page: 'campChecklists', icon: ListChecks, title: 'Camp Checklists', color: 'pink' },
         { page: 'uniformGuide', icon: Shirt, title: 'Uniform Guide', color: 'yellow' },
@@ -7464,7 +7465,6 @@ function FirstAidSimulator({ setPage }) {
   );
 }
 
-// --- DRILL SIMULATOR SVG STANCES ---
 const drillData = {
     savdhan: {
         title: "Learn to Do Savdhan",
@@ -7587,38 +7587,38 @@ const DrillPageLayout = ({ title, description, videoSrc, videoTitle, steps, chil
                     <div className="mt-8 pt-6 border-t dark:border-gray-700 border-gray-200 text-center">
                         {title === "Learn to Do Savdhan" && (
                              <>
-                                <h3 className="text-xl font-semibold text-white mb-4">Ready to practice Savdhan?</h3>
-                                <button
-                                    onClick={() => setPage('postureChecker')}
-                                    disabled={!modelReady}
-                                    className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'}`}
-                                >
-                                    {modelReady ? 'Practice Savdhan with AI' : 'AI Checker Loading...'}
-                                </button>
+                                 <h3 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Ready to practice Savdhan?</h3>
+                                 <button
+                                     onClick={() => setPage('postureChecker')}
+                                     disabled={!modelReady}
+                                     className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'}`}
+                                 >
+                                     {modelReady ? 'Practice Savdhan with AI' : 'AI Checker Loading...'}
+                                 </button>
                              </>
                         )}
                          {title === "Learn to Do Vishram" && (
                              <>
-                                <h3 className="text-xl font-semibold text-white mb-4">Ready to practice Vishram?</h3>
-                                <button
-                                    onClick={() => setPage('vishramPostureChecker')}
-                                    disabled={!modelReady}
-                                    className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'}`}
-                                >
-                                    {modelReady ? 'Practice Vishram with AI' : 'AI Checker Loading...'}
-                                </button>
+                                 <h3 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Ready to practice Vishram?</h3>
+                                 <button
+                                     onClick={() => setPage('vishramPostureChecker')}
+                                     disabled={!modelReady}
+                                     className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'}`}
+                                 >
+                                     {modelReady ? 'Practice Vishram with AI' : 'AI Checker Loading...'}
+                                 </button>
                             </>
                         )}
                         {title === "Learn to Do Samne Salute" && (
                              <>
-                                <h3 className="text-xl font-semibold text-white mb-4">Ready to practice the Salute?</h3>
-                                <button
-                                    onClick={() => setPage('dahineSalutePostureChecker')}
-                                    disabled={!modelReady}
-                                    className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-purple-500 hover:bg-purple-600 text-white'}`}
-                                >
-                                    {modelReady ? 'Practice Salute with AI' : 'AI Checker Loading...'}
-                                </button>
+                                 <h3 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Ready to practice the Salute?</h3>
+                                 <button
+                                     onClick={() => setPage('dahineSalutePostureChecker')}
+                                     disabled={!modelReady}
+                                     className={`font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 ${!modelReady ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-purple-500 hover:bg-purple-600 text-white'}`}
+                                 >
+                                     {modelReady ? 'Practice Salute with AI' : 'AI Checker Loading...'}
+                                 </button>
                             </>
                         )}
                     </div>
@@ -7630,6 +7630,20 @@ const DrillPageLayout = ({ title, description, videoSrc, videoTitle, steps, chil
         </div>
     );
 };
+
+// --- NEW: TTS Speaker Icons ---
+const SpeakerOnIcon = () => (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd"></path>
+    </svg>
+);
+
+const SpeakerOffIcon = () => (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd"></path>
+    </svg>
+);
+
 
 // --- DRILL GUIDE COMPONENT ---
 const DrillGuide = ({ setPage, modelReady, currentPageIndex, setCurrentPageIndex }) => {
@@ -7684,20 +7698,146 @@ const DrillGuide = ({ setPage, modelReady, currentPageIndex, setCurrentPageIndex
 }
 
 // --- BASE POSTURE CHECKER LOGIC (REUSABLE HOOK) ---
-const usePostureChecker = (model, analyzePose, onPerfectPose) => {
+// --- REFACTORED usePostureChecker ---
+const usePostureChecker = (model) => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const animationFrameId = useRef(null);
     const smoothedPoseRef = useRef(null);
-    const streamRef = useRef(null); // UPDATED: Added a ref to hold the camera stream directly.
+    const streamRef = useRef(null);
 
     const [isCameraOn, setIsCameraOn] = useState(false);
+    const isCameraOnRef = useRef(isCameraOn);
+
     const [feedback, setFeedback] = useState({ message: "Start camera to begin", color: "text-blue-400" });
     const [dimensions, setDimensions] = useState({ width: 640, height: 480 });
-    const [isPerfectPose, setIsPerfectPose] = useState(false);
+    
+    // --- FIX: Pose state is now managed *inside* the hook ---
+    const [pose, setPose] = useState(null);
 
+    // --- TTS State and Refs ---
+    const [isTtsEnabled, setIsTtsEnabled] = useState(true);
+    const hasUserInteracted = useRef(false);
+    const voicesRef = useRef([]);
+    const isSpeaking = useRef(false);
+    const lastSpokenInstruction = useRef("");
+    const lastSpokenTime = useRef(0);
+
+    useEffect(() => {
+        isCameraOnRef.current = isCameraOn;
+    }, [isCameraOn]);
+
+    // --- Load Voices Effect ---
+    useEffect(() => {
+        const loadVoices = () => {
+            voicesRef.current = window.speechSynthesis.getVoices();
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        return () => {
+            window.speechSynthesis.onvoiceschanged = null;
+        };
+    }, []); 
+
+    // --- TTS Helper Functions ---
+    const unlockAudio = useCallback(() => {
+        if (hasUserInteracted.current) return;
+        hasUserInteracted.current = true;
+        
+        if (window.speechSynthesis && voicesRef.current.length === 0) {
+             voicesRef.current = window.speechSynthesis.getVoices();
+        }
+        console.log("Speech synthesis unlocked by user interaction.");
+    }, []); 
+
+    const speakText = useCallback((text) => {
+        if (!isTtsEnabled || !window.speechSynthesis || !text || !hasUserInteracted.current) {
+            return;
+        }
+        
+        if (text === lastSpokenInstruction.current) {
+            return;
+        }
+
+        if (isSpeaking.current || window.speechSynthesis.speaking) {
+            return;
+        }
+
+        const now = performance.now();
+        if (now - lastSpokenTime.current < 1500) {
+            return;
+        }
+
+        const voices = voicesRef.current.length > 0 ? voicesRef.current : window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            return; 
+        }
+
+        let voiceToUse = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'));
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.lang === 'en-US');
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.lang.startsWith('en-'));
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.default);
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices[0];
+        }
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        utterance.voice = voiceToUse;
+        utterance.rate = 1.0; 
+        utterance.pitch = 1.0; 
+        utterance.volume = 0.9; 
+
+        lastSpokenInstruction.current = text; 
+        lastSpokenTime.current = now; 
+
+        utterance.onstart = () => {
+            isSpeaking.current = true;
+        };
+
+        utterance.onend = () => {
+            isSpeaking.current = false;
+        };
+
+        utterance.onerror = (event) => {
+            console.error("SpeechSynthesisUtterance.onerror", event);
+            isSpeaking.current = false;
+            lastSpokenInstruction.current = "";
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+    }, [isTtsEnabled]); 
+
+    // --- Effect to speak when feedback changes ---
+    useEffect(() => {
+        if (feedback.message) {
+            speakText(feedback.message);
+        }
+    }, [feedback, speakText]);
+
+    // --- Toggle TTS Function ---
+    const toggleTts = useCallback(() => {
+        unlockAudio(); // Unlock audio on first toggle
+        setIsTtsEnabled(prev => {
+            const newState = !prev;
+            if (!newState) { 
+                window.speechSynthesis.cancel(); 
+                isSpeaking.current = false;
+                lastSpokenInstruction.current = ""; 
+            }
+            return newState;
+        });
+    }, [unlockAudio]);
+
+    // --- stopCamera remains largely the same ---
     const stopCamera = useCallback(() => {
-        // UPDATED: More robust camera stop logic.
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop());
             streamRef.current = null;
@@ -7705,25 +7845,33 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
         if (videoRef.current && videoRef.current.srcObject) {
             videoRef.current.srcObject = null;
         }
-        setIsCameraOn(false);
-        setIsPerfectPose(false);
+        setIsCameraOn(false); 
+        // --- FIX: Reset pose state when camera stops ---
+        setPose(null);
+        smoothedPoseRef.current = null;
+        
         setFeedback({ message: "Camera off. Start to resume.", color: "text-blue-400" });
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext('2d');
             ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            isSpeaking.current = false;
+            lastSpokenInstruction.current = "";
+        }
     }, []);
 
     useEffect(() => {
-        // This cleanup function runs when the component unmounts, ensuring the camera is turned off.
         return () => {
             stopCamera();
              if (animationFrameId.current) {
-                cancelAnimationFrame(animationFrameId.current);
-            }
+                 cancelAnimationFrame(animationFrameId.current);
+             }
         };
     }, [stopCamera]);
 
+    // --- drawPose remains the same ---
     const drawPose = (pose, ctx) => {
         if (!window.poseDetection) return;
         const keypoints = pose.keypoints;
@@ -7743,6 +7891,7 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
         });
     };
     
+    // --- captureScreenshot remains the same ---
     const captureScreenshot = (pose) => {
         const video = videoRef.current; 
         const tempCanvas = document.createElement('canvas');
@@ -7752,21 +7901,27 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
         ctx.scale(-1, 1); 
         ctx.translate(-tempCanvas.width, 0);
         ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform before drawing pose
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (pose) {
             const poseCtx = tempCanvas.getContext('2d');
-            // Pose coordinates are based on the non-flipped video, so we need to flip them for the screenshot
             const flippedPose = { ...pose, keypoints: pose.keypoints.map(kp => ({...kp, x: tempCanvas.width - kp.x})) };
             drawPose(flippedPose, poseCtx);
         }
         return tempCanvas.toDataURL('image/jpeg');
     };
 
+    // --- REFACTORED: Pose Detection Loop ---
     useEffect(() => {
         const detectPose = async () => {
-            if (!isCameraOn || !model || !videoRef.current || videoRef.current.readyState < 4) {
-                animationFrameId.current = requestAnimationFrame(detectPose); return;
+            if (!isCameraOnRef.current) {
+                return;
             }
+
+            if (!model || !videoRef.current || videoRef.current.readyState < 4) {
+                animationFrameId.current = requestAnimationFrame(detectPose);
+                return;
+            }
+            
             try {
                 const poses = await model.estimatePoses(videoRef.current);
                 const ctx = canvasRef.current.getContext('2d');
@@ -7774,6 +7929,7 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
                 ctx.scale(-1, 1);
                 ctx.translate(-dimensions.width, 0);
                 ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+                
                 if (poses && poses.length > 0) {
                     let currentPose = poses[0];
                     const SMOOTHING_FACTOR = 0.4;
@@ -7787,27 +7943,43 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
                     }
                     smoothedPoseRef.current = currentPose;
                     drawPose(currentPose, ctx);
-                    analyzePose(currentPose.keypoints, () => { // Pass a callback to onPerfect
-                        if (!isPerfectPose) {
-                            const screenshot = captureScreenshot(currentPose);
-                            onPerfectPose(screenshot);
-                            setIsPerfectPose(true);
-                        }
-                    });
+                    
+                    // --- FIX: Instead of analyzing, just set the pose state ---
+                    setPose(currentPose);
+
                 } else {
                     smoothedPoseRef.current = null;
+                    // --- FIX: Set pose to null if no person is detected ---
+                    setPose(null); 
                     setFeedback({ message: "No person detected.", color: "text-yellow-400" });
                 }
                 ctx.restore();
             } catch (error) { console.error("Error during pose detection:", error); }
-            animationFrameId.current = requestAnimationFrame(detectPose);
+            
+            if (isCameraOnRef.current) {
+                animationFrameId.current = requestAnimationFrame(detectPose);
+            }
         };
-        if (isCameraOn) { detectPose(); }
-        else { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); }
-        return () => { if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); };
-    }, [isCameraOn, model, dimensions, isPerfectPose, analyzePose, onPerfectPose]);
 
+        if (isCameraOn) { 
+            detectPose(); // Start the loop
+        } else {
+            if (animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
+        }
+        
+        return () => { 
+            if (animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
+        };
+    // --- FIX: Simplified dependency array. This loop is now stable and won't restart on other state changes. ---
+    }, [isCameraOn, model, dimensions]);
+
+    // --- toggleCamera remains largely the same ---
     const toggleCamera = async () => {
+        unlockAudio(); 
         if (isCameraOn) {
             stopCamera();
         } else {
@@ -7815,7 +7987,7 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } } });
-                    streamRef.current = stream; // UPDATED: Store the stream directly in the ref.
+                    streamRef.current = stream; 
                     const video = videoRef.current;
                     if (!video) return;
                     video.srcObject = stream;
@@ -7825,7 +7997,7 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
                             canvasRef.current.width = video.videoWidth;
                             canvasRef.current.height = video.videoHeight;
                             setDimensions({ width: video.videoWidth, height: video.videoHeight });
-                            setIsCameraOn(true);
+                            setIsCameraOn(true); 
                             setFeedback({ message: "Detecting pose...", color: "text-blue-400" });
                         } catch (playError) {
                             console.error("Error playing video:", playError);
@@ -7850,7 +8022,8 @@ const usePostureChecker = (model, analyzePose, onPerfectPose) => {
         }
     };
 
-    return { videoRef, canvasRef, isCameraOn, feedback, setFeedback, toggleCamera, stopCamera };
+    // --- FIX: Return pose and captureScreenshot (for the modal) ---
+    return { videoRef, canvasRef, isCameraOn, feedback, setFeedback, toggleCamera, stopCamera, isTtsEnabled, toggleTts, pose, captureScreenshot };
 };
 
 // --- SAVDHAN CHECKER COMPONENT ---
@@ -7858,13 +8031,25 @@ const SavdhanPostureChecker = ({ setPage, model }) => {
     const [lastScreenshot, setLastScreenshot] = useState(null);
     const [showModal, setShowModal] = useState(false);
     
-    const handlePerfectPose = useCallback((screenshot) => {
+    // --- FIX: Get pose and other functions from the refactored hook ---
+    const { 
+        videoRef, canvasRef, isCameraOn, feedback, setFeedback, 
+        toggleCamera, stopCamera, isTtsEnabled, toggleTts, 
+        pose, captureScreenshot 
+    } = usePostureChecker(model);
+    
+    const postureCheckerRef = useRef();
+    postureCheckerRef.current = { stopCamera };
+
+    const handlePerfectPose = useCallback((currentPose) => {
+        // --- FIX: Pass the pose to captureScreenshot ---
+        const screenshot = captureScreenshot(currentPose);
         setLastScreenshot(screenshot);
         setShowModal(true);
         postureCheckerRef.current.stopCamera();
-    }, []);
+    }, [captureScreenshot]); // Add captureScreenshot to dependency array
 
-    const analyzeSavdhaan = useCallback((keypoints, onPerfect, setFeedback) => {
+    const analyzeSavdhaan = useCallback((keypoints, onPerfect, currentPose) => {
         const getKeypoint = (kps, name) => kps.find(kp => kp.name === name);
         const CONFIDENCE_THRESHOLD = 0.5;
         const requiredKeypoints = ['nose', 'left_shoulder', 'right_shoulder', 'left_hip', 'right_hip', 'left_ankle', 'right_ankle', 'left_elbow', 'right_elbow', 'left_wrist', 'right_wrist'];
@@ -7900,14 +8085,17 @@ const SavdhanPostureChecker = ({ setPage, model }) => {
         if (issues.length > 0) { setFeedback({ message: issues[0], color: "text-orange-400" }); }
         else {
             setFeedback({ message: "Excellent! Position is correct.", color: "text-green-400" });
-            onPerfect();
+            // --- FIX: Pass currentPose to onPerfect ---
+            onPerfect(currentPose);
         }
-    }, []);
+    }, [setFeedback]); // Add setFeedback to dependency array
 
-    const { videoRef, canvasRef, isCameraOn, feedback, setFeedback, toggleCamera, stopCamera } = usePostureChecker(model, (kp, onPerfect) => analyzeSavdhaan(kp, onPerfect, setFeedback), handlePerfectPose);
-    
-    const postureCheckerRef = useRef();
-    postureCheckerRef.current = { stopCamera };
+    // --- FIX: This new useEffect runs the analysis, reacting to pose changes ---
+    useEffect(() => {
+        if (pose && isCameraOn && !showModal) { // Only analyze if camera is on and modal is not shown
+            analyzeSavdhaan(pose.keypoints, handlePerfectPose, pose);
+        }
+    }, [pose, isCameraOn, analyzeSavdhaan, handlePerfectPose, showModal]);
 
     return (
         <Fragment>
@@ -7933,6 +8121,14 @@ const SavdhanPostureChecker = ({ setPage, model }) => {
                     </div>
                     <div className="flex items-center justify-center space-x-4 mb-6">
                         <button onClick={toggleCamera} disabled={!model} className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isCameraOn ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500/50' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50'}`}>{isCameraOn ? 'Stop Camera' : 'Start Camera'}</button>
+                        <button 
+                            onClick={toggleTts}
+                            disabled={!model}
+                            className={`p-3 rounded-lg text-white transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isTtsEnabled ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50' : 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500/50'}`}
+                            aria-label={isTtsEnabled ? "Disable feedback speech" : "Enable feedback speech"}
+                        >
+                            {isTtsEnabled ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -7957,17 +8153,28 @@ const VishramPostureChecker = ({ setPage, model }) => {
     const [lastScreenshot, setLastScreenshot] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    const handlePerfectPose = useCallback((screenshot) => {
+    // --- FIX: Get pose and other functions from the refactored hook ---
+    const { 
+        videoRef, canvasRef, isCameraOn, feedback, setFeedback, 
+        toggleCamera, stopCamera, isTtsEnabled, toggleTts, 
+        pose, captureScreenshot 
+    } = usePostureChecker(model);
+
+    const postureCheckerRef = useRef();
+    postureCheckerRef.current = { stopCamera };
+
+    const handlePerfectPose = useCallback((currentPose) => {
+        // --- FIX: Pass the pose to captureScreenshot ---
+        const screenshot = captureScreenshot(currentPose);
         setLastScreenshot(screenshot);
         setShowModal(true);
         postureCheckerRef.current.stopCamera();
-    }, []);
+    }, [captureScreenshot]); // Add captureScreenshot to dependency array
 
-    const analyzeVishram = useCallback((keypoints, onPerfect, setFeedback) => {
+    const analyzeVishram = useCallback((keypoints, onPerfect, currentPose) => {
         const getKeypoint = (kps, name) => kps.find(kp => kp.name === name);
         const CORE_CONFIDENCE = 0.4;
 
-        // Check that the main body parts are visible. Wrists are handled separately.
         const requiredBodyParts = ['left_shoulder', 'right_shoulder', 'left_hip', 'right_hip', 'left_ankle', 'right_ankle', 'left_elbow', 'right_elbow'];
         const bodyVisible = requiredBodyParts.every(part => {
             const kp = getKeypoint(keypoints, part);
@@ -7983,20 +8190,18 @@ const VishramPostureChecker = ({ setPage, model }) => {
         const rightShoulder = getKeypoint(keypoints, 'right_shoulder');
         const leftAnkle = getKeypoint(keypoints, 'left_ankle');
         const rightAnkle = getKeypoint(keypoints, 'right_ankle');
-        const leftWrist = getKeypoint(keypoints, 'left_wrist'); // Still get wrist data to check its score
+        const leftWrist = getKeypoint(keypoints, 'left_wrist');
         const rightWrist = getKeypoint(keypoints, 'right_wrist');
 
         let issues = [];
         const shoulderWidth = Math.hypot(leftShoulder.x - rightShoulder.x, leftShoulder.y - rightShoulder.y);
 
-        // 1. Feet distance check (approximating 12 inches)
         const ankleDistance = Math.hypot(leftAnkle.x - rightAnkle.x, leftAnkle.y - rightAnkle.y);
         const feetRatio = ankleDistance / shoulderWidth;
         if (feetRatio < 0.6) issues.push("Spread your feet wider (approx. 12 inches)");
         else if (feetRatio > 1.4) issues.push("Bring your feet closer (approx. 12 inches)");
 
-        // 2. NEW LOGIC: Check if wrists are HIDDEN (low confidence score)
-        const WRIST_HIDDEN_CONFIDENCE = 0.35; // A threshold to consider a wrist "hidden"
+        const WRIST_HIDDEN_CONFIDENCE = 0.35;
         const leftWristHidden = !leftWrist || leftWrist.score < WRIST_HIDDEN_CONFIDENCE;
         const rightWristHidden = !rightWrist || rightWrist.score < WRIST_HIDDEN_CONFIDENCE;
 
@@ -8004,7 +8209,6 @@ const VishramPostureChecker = ({ setPage, model }) => {
             issues.push("Place your forearms behind your back");
         }
 
-        // 3. Body straightness check
         const shoulderMidPoint = { x: (leftShoulder.x + rightShoulder.x) / 2 };
         const ankleMidPoint = { x: (leftAnkle.x + rightAnkle.x) / 2 };
         const lean = Math.abs(shoulderMidPoint.x - ankleMidPoint.x);
@@ -8014,15 +8218,17 @@ const VishramPostureChecker = ({ setPage, model }) => {
             setFeedback({ message: issues[0], color: "text-orange-400" });
         } else {
             setFeedback({ message: "Excellent! Vishram position is correct.", color: "text-green-400" });
-            onPerfect();
+            // --- FIX: Pass currentPose to onPerfect ---
+            onPerfect(currentPose);
         }
-    }, []);
+    }, [setFeedback]); // Add setFeedback to dependency array
 
-
-    const { videoRef, canvasRef, isCameraOn, feedback, setFeedback, toggleCamera, stopCamera } = usePostureChecker(model, (kp, onPerfect) => analyzeVishram(kp, onPerfect, setFeedback), handlePerfectPose);
-    
-    const postureCheckerRef = useRef();
-    postureCheckerRef.current = { stopCamera };
+    // --- FIX: This new useEffect runs the analysis, reacting to pose changes ---
+    useEffect(() => {
+        if (pose && isCameraOn && !showModal) {
+            analyzeVishram(pose.keypoints, handlePerfectPose, pose);
+        }
+    }, [pose, isCameraOn, analyzeVishram, handlePerfectPose, showModal]);
 
     return (
         <Fragment>
@@ -8048,6 +8254,14 @@ const VishramPostureChecker = ({ setPage, model }) => {
                     </div>
                     <div className="flex items-center justify-center space-x-4 mb-6">
                         <button onClick={toggleCamera} disabled={!model} className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isCameraOn ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500/50' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50'}`}>{isCameraOn ? 'Stop Camera' : 'Start Camera'}</button>
+                        <button 
+                            onClick={toggleTts}
+                            disabled={!model}
+                            className={`p-3 rounded-lg text-white transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isTtsEnabled ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50' : 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500/50'}`}
+                            aria-label={isTtsEnabled ? "Disable feedback speech" : "Enable feedback speech"}
+                        >
+                            {isTtsEnabled ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -8072,13 +8286,25 @@ const DahineSalutePostureChecker = ({ setPage, model }) => {
     const [lastScreenshot, setLastScreenshot] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    const handlePerfectPose = useCallback((screenshot) => {
+    // --- FIX: Get pose and other functions from the refactored hook ---
+    const { 
+        videoRef, canvasRef, isCameraOn, feedback, setFeedback, 
+        toggleCamera, stopCamera, isTtsEnabled, toggleTts, 
+        pose, captureScreenshot 
+    } = usePostureChecker(model);
+
+    const postureCheckerRef = useRef();
+    postureCheckerRef.current = { stopCamera };
+
+    const handlePerfectPose = useCallback((currentPose) => {
+        // --- FIX: Pass the pose to captureScreenshot ---
+        const screenshot = captureScreenshot(currentPose);
         setLastScreenshot(screenshot);
         setShowModal(true);
         postureCheckerRef.current.stopCamera();
-    }, []);
+    }, [captureScreenshot]); // Add captureScreenshot to dependency array
 
-    const analyzeDahineSalute = useCallback((keypoints, onPerfect, setFeedback) => {
+    const analyzeDahineSalute = useCallback((keypoints, onPerfect, currentPose) => {
         const getKeypoint = (kps, name) => kps.find(kp => kp.name === name);
         const CONFIDENCE = 0.4;
 
@@ -8137,22 +8363,30 @@ const DahineSalutePostureChecker = ({ setPage, model }) => {
             elbowAngleDeg = 360 - elbowAngleDeg;
         }
 
-        if (elbowAngleDeg < 35 || elbowAngleDeg > 40) {
-            issues.push("Bend your forearm to the correct angle 45 degree");
+        if (elbowAngleDeg < 30 || elbowAngleDeg > 50) {
+            issues.push("Bend your forearm to a 45 degree angle");
+        }
+        
+        const wristToEyeDist = Math.hypot(rightWrist.x - rightEye.x, rightWrist.y - rightEye.y);
+        if (wristToEyeDist / torsoHeight > 0.15) { 
+             issues.push("Touch your forefinger to your right eyebrow");
         }
         
         if (issues.length > 0) {
             setFeedback({ message: issues[0], color: "text-orange-400" });
         } else {
             setFeedback({ message: "Excellent! Salute is correct.", color: "text-green-400" });
-            onPerfect();
+            // --- FIX: Pass currentPose to onPerfect ---
+            onPerfect(currentPose);
         }
-    }, []);
+    }, [setFeedback]); // Add setFeedback to dependency array
 
-    const { videoRef, canvasRef, isCameraOn, feedback, setFeedback, toggleCamera, stopCamera } = usePostureChecker(model, (kp, onPerfect) => analyzeDahineSalute(kp, onPerfect, setFeedback), handlePerfectPose);
-    
-    const postureCheckerRef = useRef();
-    postureCheckerRef.current = { stopCamera };
+    // --- FIX: This new useEffect runs the analysis, reacting to pose changes ---
+    useEffect(() => {
+        if (pose && isCameraOn && !showModal) {
+            analyzeDahineSalute(pose.keypoints, handlePerfectPose, pose);
+        }
+    }, [pose, isCameraOn, analyzeDahineSalute, handlePerfectPose, showModal]);
 
     return (
         <Fragment>
@@ -8178,6 +8412,14 @@ const DahineSalutePostureChecker = ({ setPage, model }) => {
                     </div>
                     <div className="flex items-center justify-center space-x-4 mb-6">
                         <button onClick={toggleCamera} disabled={!model} className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isCameraOn ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500/50' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50'}`}>{isCameraOn ? 'Stop Camera' : 'Start Camera'}</button>
+                        <button 
+                            onClick={toggleTts}
+                            disabled={!model}
+                            className={`p-3 rounded-lg text-white transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 ${!model ? 'bg-gray-600 cursor-not-allowed' : isTtsEnabled ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500/50' : 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500/50'}`}
+                            aria-label={isTtsEnabled ? "Disable feedback speech" : "Enable feedback speech"}
+                        >
+                            {isTtsEnabled ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -8581,6 +8823,857 @@ const RankStructureGuide = ({ setPage }) => {
     );
 };
 
+const jointNames = {
+    11: "Left Shoulder", 12: "Right Shoulder",
+    13: "Left Elbow", 14: "Right Elbow",
+    15: "Left Wrist", 16: "Right Wrist",
+    23: "Left Hip", 24: "Right Hip",
+    25: "Left Knee", 26: "Right Knee",
+    27: "Left Ankle", 28: "Right Ankle",
+};
+// We only care about these key joints for providing feedback
+const keyJointsForFeedback = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+
+/**
+ * Calculates pose similarity using cosine similarity on normalized pose vectors.
+ * @param {Array} landmarks1 First set of landmarks.
+ * @param {Array} landmarks2 Second set of landmarks.
+ * @returns {number} Similarity score between 0 and 1.
+ */
+function calculatePoseSimilarity(landmarks1, landmarks2) {
+    const v1 = normalizePose(landmarks1).vector;
+    const v2 = normalizePose(landmarks2).vector;
+
+    let dotProduct = 0;
+    let magV1 = 0;
+    let magV2 = 0;
+    
+    for (let i = 0; i < v1.length; i++) {
+        dotProduct += v1[i] * v2[i];
+        magV1 += v1[i] * v1[i];
+        magV2 += v2[i] * v2[i];
+    }
+    magV1 = Math.sqrt(magV1);
+    magV2 = Math.sqrt(magV2);
+
+    if (magV1 === 0 || magV2 === 0) {
+        return 0; // Avoid division by zero
+    }
+    
+    const similarity = dotProduct / (magV1 * magV2);
+    // Rescale from [-1, 1] to [0, 1] and apply power to make 100% harder
+    const rescaledSimilarity = (similarity + 1) / 2;
+    return Math.pow(rescaledSimilarity, 2);
+}
+
+/**
+ * Normalizes pose landmarks based on hip center and torso scale.
+ * @param {Array} landmarks The pose landmarks.
+ * @param {boolean} returnOriginalCoords Whether to return normalized {x, y} objects.
+ * @returns {object} Normalized vector, landmarks, and scale.
+ */
+function normalizePose(landmarks, returnOriginalCoords = false) {
+    if (!landmarks || landmarks.length === 0) {
+        return { vector: [], landmarks: [], scale: 0 };
+    }
+    
+    if (!landmarks[11] || !landmarks[12] || !landmarks[23] || !landmarks[24]) {
+         return { vector: [], landmarks: [], scale: 0 }; // Fallback
+    }
+
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
+    const hipCenter = {
+        x: (leftHip.x + rightHip.x) / 2,
+        y: (leftHip.y + rightHip.y) / 2,
+    };
+
+    const leftShoulder = landmarks[11];
+    const rightShoulder = landmarks[12];
+    const shoulderCenter = {
+        x: (leftShoulder.x + rightShoulder.x) / 2,
+        y: (leftShoulder.y + rightShoulder.y) / 2,
+    };
+    
+    let torsoScale = Math.sqrt(
+        Math.pow(hipCenter.x - shoulderCenter.x, 2) +
+        Math.pow(hipCenter.y - shoulderCenter.y, 2)
+    );
+
+    if (torsoScale < 0.1) {
+        const minY = Math.min(...landmarks.map(lm => lm.y));
+        const maxY = Math.max(...landmarks.map(lm => lm.y));
+        torsoScale = (maxY - minY) || 1;
+    }
+
+    const normalizedVector = [];
+    const normalizedLandmarks = [];
+    for (let i = 0; i < landmarks.length; i++) {
+        const lm = landmarks[i];
+        if (!lm) {
+             normalizedVector.push(0, 0);
+             if (returnOriginalCoords) {
+                 normalizedLandmarks[i] = { x: 0, y: 0 };
+             }
+             continue;
+        }
+        const normX = (lm.x - hipCenter.x) / torsoScale;
+        const normY = (lm.y - hipCenter.y) / torsoScale;
+        normalizedVector.push(normX, normY);
+        if (returnOriginalCoords) {
+            normalizedLandmarks[i] = { x: normX, y: normY }; 
+        }
+    }
+    
+    return { vector: normalizedVector, landmarks: normalizedLandmarks, scale: torsoScale };
+}
+
+const AIPoseMatcher = ({ setPage }) => {
+    // This effect runs once when the component mounts, scrolling the window to the top.
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    // --- State ---
+    const [isLoading, setIsLoading] = useState(true);
+    const [statusText, setStatusText] = useState("Loading AI Model (this may take a moment)...");
+    const [instruction, setInstruction] = useState("Loading AI Model (this may take a moment)...");
+    const [webcamRunning, setWebcamRunning] = useState(false);
+    const [referenceLandmarks, setReferenceLandmarks] = useState(null);
+    const [currentLiveLandmarks, setCurrentLiveLandmarks] = useState(null);
+    const [scorePercentage, setScorePercentage] = useState(0);
+    const [scoreColor, setScoreColor] = useState('#ef4444');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [snapshotImgSrc, setSnapshotImgSrc] = useState("");
+    const [isTtsEnabled, setIsTtsEnabled] = useState(true);
+    const [snapshotTriggered, setSnapshotTriggered] = useState(false);
+
+    // --- Refs for mutable objects, async state, and imported classes ---
+    const poseLandmarker = useRef(null);
+    const drawingUtilsRef = useRef(null);
+    const drawingUtilsLive = useRef(null);
+    const lastVideoTime = useRef(-1);
+    const hasUserInteracted = useRef(false);
+    const isSpeaking = useRef(false); // Ref to track speech state
+    const lastSpokenInstruction = useRef("");
+    const lastSpokenTime = useRef(0); // <-- NEW: Ref to throttle speech
+    const at97StartTime = useRef(0);
+    const animationFrameRef = useRef(null);
+    const voicesRef = useRef([]); // Ref to store available TTS voices
+    // This ref will store the dynamically imported MediaPipe classes
+    const visionRefs = useRef({
+        PoseLandmarker: null,
+        FilesetResolver: null,
+        DrawingUtils: null
+    });
+
+    // --- DOM Refs ---
+    const videoRef = useRef(null);
+    const referenceImgElementRef = useRef(null);
+    const imageUploaderRef = useRef(null);
+    const refCanvasRef = useRef(null);
+    const liveCanvasRef = useRef(null);
+
+    // --- 1. Initialization: Load the MediaPipe Model ---
+    useEffect(() => {
+        let isCancelled = false;
+        
+        async function loadMediaPipe() {
+            try {
+                // Dynamically import MediaPipe modules
+                const { PoseLandmarker, FilesetResolver, DrawingUtils } = await import(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.js"
+                );
+                
+                if (isCancelled) return;
+                
+                // Store imported classes in ref
+                visionRefs.current = { PoseLandmarker, FilesetResolver, DrawingUtils };
+
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+                );
+                
+                if (isCancelled) return;
+
+                const landmarker = await PoseLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numPoses: 1
+                });
+                
+                if (isCancelled) return;
+
+                poseLandmarker.current = landmarker;
+                
+                // Initialize canvas contexts and drawing utils
+                const refCtx = refCanvasRef.current.getContext("2d");
+                const liveCtx = liveCanvasRef.current.getContext("2d");
+                drawingUtilsRef.current = new DrawingUtils(refCtx);
+                drawingUtilsLive.current = new DrawingUtils(liveCtx);
+
+                setIsLoading(false);
+                setInstruction("Model loaded. Please upload a reference image.");
+
+            } catch (error) {
+                if (isCancelled) return;
+                console.error("Error loading pose landmarker:", error);
+                setStatusText("Error loading AI model. Please refresh the page.");
+            }
+        }
+        
+        loadMediaPipe();
+
+        // Cleanup function
+        return () => {
+            isCancelled = true;
+            
+            // --- Webcam Cleanup ---
+            if (videoRef.current && videoRef.current.srcObject) {
+                try {
+                    const stream = videoRef.current.srcObject;
+                    stream.getTracks().forEach(track => track.stop());
+                    videoRef.current.srcObject = null;
+                    console.log("Webcam stopped on component unmount.");
+                } catch (e) {
+                    console.error("Error stopping webcam on unmount:", e);
+                }
+            }
+            // --- End Webcam Cleanup ---
+
+            // --- Animation Frame Cleanup ---
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
+            // --- End Animation Frame Cleanup ---
+
+            // --- TTS Cleanup ---
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            isSpeaking.current = false;
+            // --- End TTS Cleanup ---
+
+            // TODO: Add poseLandmarker.current?.close() if available for cleanup
+        };
+    }, []); // Empty dependency array, runs once on mount.
+
+    // --- 1b. Initialization: Load TTS Voices ---
+    useEffect(() => {
+        const loadVoices = () => {
+            const availableVoices = window.speechSynthesis.getVoices();
+            if (availableVoices.length > 0) {
+                voicesRef.current = availableVoices;
+                // console.log("Speech voices loaded:", availableVoices.map(v => v.name));
+            }
+        };
+
+        // Load voices immediately
+        loadVoices();
+
+        // Add listener for when voices change (async loading)
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
+        // Cleanup listener
+        return () => {
+            window.speechSynthesis.onvoiceschanged = null;
+        };
+    }, []); // Runs once on mount
+
+    // --- 7. UI Update Functions ---
+    const updateScoreBar = useCallback((percentage) => {
+        const clampedPercentage = Math.max(0, Math.min(100, percentage));
+        setScorePercentage(clampedPercentage);
+
+        if (clampedPercentage < 50) {
+            setScoreColor('#ef4444'); // Red
+        } else if (clampedPercentage < 80) {
+            setScoreColor('#facc15'); // Yellow
+        } else if (clampedPercentage < 99) {
+            setScoreColor('#22c55e'); // Green
+        } else { // 99% and above
+            setScoreColor('#fcd34d'); // Golden/Amber
+        }
+    }, []); // No dependencies
+
+    // --- TTS Helper Functions ---
+    /**
+     * Unlocks speech synthesis, which requires user interaction.
+     */
+    const unlockAudio = useCallback(() => {
+        if (hasUserInteracted.current) return;
+        hasUserInteracted.current = true;
+        
+        // Re-check voices on interaction, just in case.
+        if (window.speechSynthesis && voicesRef.current.length === 0) {
+             voicesRef.current = window.speechSynthesis.getVoices();
+        }
+        console.log("Speech synthesis unlocked by user interaction.");
+    }, []); // No dependencies
+
+    /**
+     * Speaks the provided text using the browser's built-in SpeechSynthesis API.
+     */
+    const speakText = useCallback((text) => {
+        // Check if TTS is enabled, if the browser supports it, or if text is empty
+        if (!isTtsEnabled || !window.speechSynthesis || !text) {
+            return;
+        }
+        
+        // 1. Don't repeat the same instruction.
+        if (text === lastSpokenInstruction.current) {
+            return;
+        }
+
+        // 2. Don't speak if already speaking.
+        if (isSpeaking.current || window.speechSynthesis.speaking) {
+            return;
+        }
+
+        const now = performance.now();
+        // 3. Throttle: Don't speak a new instruction if we just spoke one
+        //    (e.g., wait 1.5 seconds between new *different* instructions)
+        if (now - lastSpokenTime.current < 1500) {
+            return;
+        }
+
+        // --- Voice Selection Logic ---
+        const voices = voicesRef.current.length > 0 ? voicesRef.current : window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            // console.warn("Speech synthesis: No voices available to speak.");
+            return; // Can't speak if no voices are loaded
+        }
+
+        let voiceToUse = voices.find(v => v.lang === 'en-US' && v.name.includes('Google')); // Prefer a high-quality Google voice
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.lang === 'en-US'); // Fallback to any en-US
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.lang.startsWith('en-')); // Fallback to any English
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices.find(v => v.default); // Fallback to default
+        }
+        if (!voiceToUse) {
+            voiceToUse = voices[0]; // Fallback to the very first voice
+        }
+        // --- End Voice Selection ---
+
+        // We are not speaking, so we can proceed.
+        // We are no longer aggressively cancelling.
+        // window.speechSynthesis.cancel(); // <-- REMOVED
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Apply the found voice
+        utterance.voice = voiceToUse;
+        
+        // Set properties
+        // utterance.lang = "en-US"; // <-- REMOVED THIS. The voice object handles it.
+        utterance.rate = 1.0; // Normal speed
+        utterance.pitch = 1.0; // Normal pitch
+        utterance.volume = 0.9; // Slightly less than max
+
+        lastSpokenInstruction.current = text; // Set the cache *before* speaking
+        lastSpokenTime.current = now; // Set the throttle time
+
+        utterance.onstart = () => {
+            isSpeaking.current = true;
+        };
+
+        utterance.onend = () => {
+            isSpeaking.current = false;
+            // Don't clear cache, let throttle and new text handle it
+        };
+
+        utterance.onerror = (event) => {
+            console.error("SpeechSynthesisUtterance.onerror", event);
+            isSpeaking.current = false;
+            // If speech fails, clear the cache so it can be retried after throttle
+            lastSpokenInstruction.current = "";
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+    }, [isTtsEnabled]); // Depends on isTtsEnabled state
+
+    // --- Feedback Functions ---
+    const getDetailedPoseFeedback = useCallback((refLms, liveLms) => {
+        if (!refLms || !liveLms) return "";
+
+        const refNorm = normalizePose(refLms, true); 
+        const liveNorm = normalizePose(liveLms, true);
+        let maxDeviation = 0;
+        let feedbackJointName = null;
+        let refPoint, livePoint;
+
+        for (const jointId of keyJointsForFeedback) {
+            const refJ = refNorm.landmarks[jointId];
+            const liveJ = liveNorm.landmarks[jointId];
+            if (!refJ || !liveJ) continue; 
+            
+            const dx = (refJ.x - liveJ.x);
+            const dy = (refJ.y - liveJ.y);
+            const deviation = Math.sqrt(dx * dx + dy * dy); 
+            
+            if (deviation > maxDeviation) {
+                maxDeviation = deviation;
+                feedbackJointName = jointNames[jointId];
+                refPoint = refJ;
+                livePoint = liveJ;
+            }
+        }
+        
+        const feedbackThreshold = 0.15; // Normalized deviation threshold
+        if (feedbackJointName && maxDeviation > feedbackThreshold) {
+            const yDiff = refPoint.y - livePoint.y;
+            if (Math.abs(yDiff) > feedbackThreshold / 2) {
+                return yDiff > 0 ? `Move your ${feedbackJointName} down.` : `Move your ${feedbackJointName} up.`;
+            }
+            const xDiff = refPoint.x - livePoint.x;
+            if (Math.abs(xDiff) > feedbackThreshold / 2) {
+                // Flipped cam logic
+                return xDiff < 0 ? `Move your ${feedbackJointName} to your right.` : `Move your ${feedbackJointName} to your left.`;
+            }
+            return `Adjust your ${feedbackJointName}.`;
+        }
+        return ""; // No specific feedback needed
+    }, []); // No deps
+
+    const updateInstructionText = useCallback((percentage) => {
+        let newInstruction = "";
+
+        if (snapshotTriggered) {
+            newInstruction = "Perfect Match!";
+        } else if (!referenceLandmarks || !currentLiveLandmarks) {
+            newInstruction = "Upload an image and start your webcam to begin.";
+        } else if (percentage < 50) {
+            newInstruction = "Significant mismatch. Try to generally align your body.";
+        } else if (percentage < 80) {
+            newInstruction = "Getting there! Adjust your limbs to match the reference.";
+        } else if (percentage < 97) {
+            const feedback = getDetailedPoseFeedback(referenceLandmarks, currentLiveLandmarks);
+            newInstruction = feedback || "Fine-tune your pose for a perfect match.";
+        } else {
+            newInstruction = "Hold that pose! You're almost there!";
+        }
+        
+        setInstruction(newInstruction);
+        speakText(newInstruction);
+    }, [snapshotTriggered, referenceLandmarks, currentLiveLandmarks, getDetailedPoseFeedback, speakText]);
+
+    // --- 9. Snapshot Functionality ---
+    const takeSnapshotAndShowModal = useCallback(() => {
+        if (!liveCanvasRef.current || !videoRef.current) return;
+
+        const snapshotTempCanvas = document.createElement('canvas');
+        snapshotTempCanvas.width = liveCanvasRef.current.width;
+        snapshotTempCanvas.height = liveCanvasRef.current.height;
+        const snapshotCtx = snapshotTempCanvas.getContext('2d');
+
+        // Draw the non-flipped video frame
+        snapshotCtx.drawImage(videoRef.current, 0, 0, snapshotTempCanvas.width, snapshotTempCanvas.height);
+
+        // Draw non-flipped landmarks
+        if (currentLiveLandmarks && visionRefs.current.DrawingUtils && visionRefs.current.PoseLandmarker) {
+            const { DrawingUtils, PoseLandmarker } = visionRefs.current;
+            const tempDrawingUtils = new DrawingUtils(snapshotCtx);
+            tempDrawingUtils.drawLandmarks(currentLiveLandmarks, {
+                radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
+            });
+            tempDrawingUtils.drawConnectors(currentLiveLandmarks, PoseLandmarker.POSE_CONNECTIONS);
+        }
+
+        setSnapshotImgSrc(snapshotTempCanvas.toDataURL("image/png"));
+        setIsModalOpen(true);
+
+        // Stop the webcam
+        if (webcamRunning) {
+            const stream = videoRef.current.srcObject;
+            stream.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+            setWebcamRunning(false); // This will stop the anim frame loop
+        }
+    }, [webcamRunning, currentLiveLandmarks]); // Added deps
+
+    // --- 6. Snapshot Timer Logic ---
+    const checkSnapshotTimers = useCallback((percentage, currentTime) => {
+        if (snapshotTriggered) return;
+
+        if (percentage >= 95) {
+            if (at97StartTime.current === 0) {
+                at97StartTime.current = currentTime; // Start timer
+            }
+            if (currentTime - at97StartTime.current >= 6000) { // 6 seconds
+                setSnapshotTriggered(true); // Set state
+                takeSnapshotAndShowModal();
+            }
+        } else {
+            at97StartTime.current = 0; // Reset timer
+            setSnapshotTriggered(false); // Allow re-triggering
+        }
+    }, [snapshotTriggered, takeSnapshotAndShowModal]);
+
+    // --- 4. Real-time Prediction Loop ---
+    const predictWebcam = useCallback(async () => {
+        if (!webcamRunning) {
+            animationFrameRef.current = null;
+            return; // Stop the loop
+        }
+        
+        // Ensure all refs are ready
+        if (!webcamRunning || !videoRef.current || !poseLandmarker.current || !liveCanvasRef.current || !drawingUtilsLive.current || !visionRefs.current.DrawingUtils) {
+            animationFrameRef.current = requestAnimationFrame(predictWebcam);
+            return;
+        }
+
+        const startTimeMs = performance.now();
+        
+        if (videoRef.current.currentTime !== lastVideoTime.current) {
+            lastVideoTime.current = videoRef.current.currentTime;
+            
+            const results = poseLandmarker.current.detectForVideo(videoRef.current, startTimeMs);
+
+            const liveCtx = liveCanvasRef.current.getContext("2d");
+            liveCtx.clearRect(0, 0, liveCanvasRef.current.width, liveCanvasRef.current.height);
+            liveCtx.save();
+            liveCtx.scale(-1, 1); // Flip horizontally
+            liveCtx.drawImage(videoRef.current, -liveCanvasRef.current.width, 0, liveCanvasRef.current.width, liveCanvasRef.current.height);
+            liveCtx.restore();
+
+            if (results.landmarks && results.landmarks.length > 0) {
+                const newLandmarks = results.landmarks[0];
+                setCurrentLiveLandmarks(newLandmarks); // Set state
+
+                // Flip landmarks for mirrored drawing
+                const flippedLandmarks = newLandmarks.map(lm => ({ ...lm, x: 1 - lm.x }));
+                
+                drawingUtilsLive.current.drawLandmarks(flippedLandmarks, {
+                    radius: (data) => visionRefs.current.DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
+                });
+                drawingUtilsLive.current.drawConnectors(flippedLandmarks, visionRefs.current.PoseLandmarker.POSE_CONNECTIONS);
+                
+                if (referenceLandmarks) {
+                    const score = calculatePoseSimilarity(referenceLandmarks, newLandmarks);
+                    const percentage = Math.max(0, Math.min(100, score * 100));
+                    
+                    updateScoreBar(percentage);
+                    updateInstructionText(percentage);
+                    checkSnapshotTimers(percentage, startTimeMs);
+                }
+            } else {
+                setCurrentLiveLandmarks(null);
+                if (referenceLandmarks) {
+                    const newInstruction = "No person detected. Please make sure you are in frame.";
+                    setInstruction(newInstruction);
+                    speakText(newInstruction);
+                }
+                at97StartTime.current = 0; // Reset timer
+            }
+        }
+
+        // Continue the loop
+        animationFrameRef.current = requestAnimationFrame(predictWebcam);
+    }, [
+        webcamRunning, 
+        referenceLandmarks, 
+        checkSnapshotTimers, 
+        speakText, 
+        updateInstructionText, 
+        updateScoreBar
+    ]);
+
+    // Effect to start/stop the prediction loop based on webcamRunning state
+    useEffect(() => {
+        if (webcamRunning) {
+            animationFrameRef.current = requestAnimationFrame(predictWebcam);
+        } else {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
+        }
+        
+        return () => { // Cleanup
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
+        };
+    }, [webcamRunning, predictWebcam]);
+
+    // --- 2. Handle Image Upload and Analysis ---
+    const handleImageUpload = useCallback(async (event) => {
+        const file = event.target.files[0];
+        if (!file || !poseLandmarker.current || !visionRefs.current.DrawingUtils) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            referenceImgElementRef.current.src = e.target.result;
+            referenceImgElementRef.current.onload = async () => {
+                const img = referenceImgElementRef.current;
+                refCanvasRef.current.width = img.width;
+                refCanvasRef.current.height = img.height;
+                
+                const refCtx = refCanvasRef.current.getContext("2d");
+                refCtx.clearRect(0, 0, refCanvasRef.current.width, refCanvasRef.current.height);
+                refCtx.drawImage(img, 0, 0, refCanvasRef.current.width, refCanvasRef.current.height);
+
+                await poseLandmarker.current.setOptions({ runningMode: "IMAGE" });
+                
+                const results = poseLandmarker.current.detect(img);
+                
+                if (results.landmarks && results.landmarks.length > 0) {
+                    const landmarks = results.landmarks[0];
+                    setReferenceLandmarks(landmarks); // Set state
+                    
+                    const { DrawingUtils, PoseLandmarker } = visionRefs.current;
+                    drawingUtilsRef.current.drawLandmarks(landmarks, {
+                        radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
+                    });
+                    drawingUtilsRef.current.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS);
+                    
+                    setInstruction("Reference pose captured. Now start your webcam.");
+                    updateScoreBar(0);
+                    setSnapshotTriggered(false);
+                } else {
+                    setInstruction("No pose detected in the image. Please try another one.");
+                    setReferenceLandmarks(null);
+                    updateScoreBar(0);
+                }
+
+                await poseLandmarker.current.setOptions({ runningMode: "VIDEO" });
+            };
+        };
+        reader.readAsDataURL(file);
+    }, [updateScoreBar]); // Depends on updateScoreBar
+
+    // --- 3. Toggle Webcam and Start Live Analysis ---
+    const toggleWebcam = useCallback(async () => {
+        unlockAudio(); // Ensure speech is unlocked on first interaction
+
+        if (webcamRunning) {
+            // Stop the webcam
+            const stream = videoRef.current.srcObject;
+            stream.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+            setWebcamRunning(false); // This will stop the loop via useEffect
+            
+            const liveCtx = liveCanvasRef.current.getContext("2d");
+            liveCtx.clearRect(0, 0, liveCanvasRef.current.width, liveCanvasRef.current.height);
+            const newInstruction = "Webcam stopped.";
+            setInstruction(newInstruction);
+            speakText(newInstruction);
+        } else {
+            // Start the webcam
+            // speakText(instruction); // <-- REMOVED: This was a race condition
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoRef.current.srcObject = stream;
+                videoRef.current.onloadeddata = () => {
+                    liveCanvasRef.current.width = videoRef.current.videoWidth;
+                    liveCanvasRef.current.height = videoRef.current.videoHeight;
+                    setWebcamRunning(true); // This will start the loop via useEffect
+                    
+                    const newInstruction = referenceLandmarks ? "Try to match the pose!" : "Webcam started. Upload a reference pose.";
+                    setInstruction(newInstruction);
+                    speakText(newInstruction);
+                    lastVideoTime.current = -1;
+                };
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+                const newInstruction = "Could not access webcam. Please check permissions.";
+                setInstruction(newInstruction);
+                speakText(newInstruction);
+            }
+        }
+    }, [webcamRunning, instruction, referenceLandmarks, unlockAudio, speakText]);
+
+    // --- Other Event Handlers ---
+    const toggleTts = useCallback(() => {
+        const newTtsState = !isTtsEnabled;
+        setIsTtsEnabled(newTtsState);
+        
+        if (newTtsState) {
+            // If turning on, clear cache and speak
+            lastSpokenInstruction.current = "";
+            speakText(instruction);
+        } else {
+            // If turning off, stop any playing audio
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            isSpeaking.current = false; // Manually reset flag
+        }
+    }, [isTtsEnabled, instruction, speakText]);
+
+    const handleUploadClick = () => {
+        unlockAudio(); // Ensure speech is unlocked on first interaction
+        imageUploaderRef.current.click();
+    };
+
+    const handleDownloadSnapshot = () => {
+        const a = document.createElement("a");
+        a.href = snapshotImgSrc; // Use state
+        a.download = "pose-match-snapshot.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const handleContinueMatching = () => {
+        setIsModalOpen(false);
+        setSnapshotTriggered(false);
+        at97StartTime.current = 0;
+        
+        // Restart the webcam
+        if (!webcamRunning) {
+            toggleWebcam();
+        }
+    };
+
+    // --- JSX Return ---
+    return (
+        <>
+            {/* Tailwind styles are now applied directly */}
+            <div className="font-sans bg-gray-900 text-white min-h-screen p-4 md:p-8">
+                <div className="container mx-auto max-w-7xl">
+                    
+                    {/* --- Back Button Added --- */}
+                    <button onClick={() => setPage('dashboard')} className="mb-8 inline-flex items-center text-gray-300 hover:text-white font-semibold transition-colors duration-200">
+                        <ChevronLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+                    </button>
+
+                    {/* Header */}
+                    <header className="text-center mb-6">
+                        <h1 className="text-3xl md:text-4xl font-bold text-blue-400">Poser</h1>
+                        <p className="text-lg text-gray-300">Upload a pose, start your webcam, and match it!</p>
+                    </header>
+
+                    {/* Loading Container */}
+                    {isLoading && (
+                        <div className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg mb-6">
+                            <div className="w-10 h-10 border-4 border-gray-100 border-t-4 border-t-blue-500 rounded-full animate-spin"></div>
+                            <p className={`mt-2 ${statusText.includes("Error") ? "text-red-500" : "text-blue-300"}`}>
+                                {statusText}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Main Content Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        
+                        {/* Column 1: Reference Pose & Status */}
+                        <div className="bg-gray-800 p-4 rounded-lg shadow-lg md:col-span-1">
+                            <h2 className="text-2xl font-semibold mb-4 text-center">Reference Pose</h2>
+                            <canvas ref={refCanvasRef} width="640" height="480" className="w-full h-auto aspect-[4/3] rounded-lg bg-gray-900 shadow-lg"></canvas>
+                            <input 
+                                type="file" 
+                                ref={imageUploaderRef} 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={handleImageUpload} 
+                            />
+                            <button 
+                                disabled={isLoading || isModalOpen} 
+                                onClick={handleUploadClick}
+                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Upload Image
+                            </button>
+
+                            {/* Score & Instructions */}
+                            <div className="mt-6">
+                                <div className="flex items-center justify-center mb-4">
+                                    <h3 className="text-2xl font-semibold">Match Status</h3>
+                                    <button 
+                                        onClick={toggleTts}
+                                        className={`ml-4 p-2 rounded-full text-white transition-colors ${isTtsEnabled ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'}`}
+                                        disabled={statusText.includes("Error")} // Disable if audio context failed
+                                    >
+                                        {isTtsEnabled ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                
+                                <div className="flex justify-center items-center gap-4 mt-4">
+                                    <p className="text-lg text-gray-300 flex-1 text-right">
+                                        {instruction}
+                                    </p>
+                                    <div className="w-8 h-64 bg-gray-700 rounded-full overflow-hidden flex flex-col-reverse flex-shrink-0">
+                                        <div 
+                                            className="w-full rounded-full transition-all duration-300" 
+                                            style={{ height: `${scorePercentage}%`, backgroundColor: scoreColor }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 2: Live Pose */}
+                        <div className="bg-gray-800 p-4 rounded-lg shadow-lg md:col-span-3">
+                            <h2 className="text-2xl font-semibold mb-4 text-center">Your Pose</h2>
+                            <canvas ref={liveCanvasRef} width="640" height="480" className="w-full h-auto aspect-[4/3] rounded-lg bg-gray-900 shadow-lg"></canvas>
+                            <button 
+                                disabled={isLoading || isModalOpen} 
+                                onClick={toggleWebcam}
+                                className={`mt-4 w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    webcamRunning 
+                                    ? 'bg-red-600 hover:bg-red-700' 
+                                    : 'bg-green-600 hover:bg-green-700'
+                                }`}
+                            >
+                                {webcamRunning ? "Stop Webcam" : "Start Webcam"}
+                            </button>
+                        </div>
+                    </div> {/* End of grid */}
+                </div> {/* End of container */}
+
+                {/* Hidden elements for processing */}
+                <video ref={videoRef} className="hidden" autoPlay playsInline></video>
+                <img ref={referenceImgElementRef} className="hidden" />
+
+                {/* Snapshot Modal */}
+                {isModalOpen && (
+                    <div className="fixed z-50 left-0 top-0 w-full h-full overflow-auto bg-black/80 flex items-center justify-center">
+                        <div className="bg-gray-800 mx-auto p-8 rounded-lg text-center shadow-xl max-w-md">
+                            <h2 className="text-3xl font-bold mb-4 text-amber-400">Perfect Match!</h2>
+                            <img src={snapshotImgSrc} className="w-full mx-auto rounded-lg mb-4" alt="Pose match snapshot" />
+                            <div className="flex justify-center gap-4">
+                                <button 
+                                    onClick={handleDownloadSnapshot}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                                >
+                                    Download Snapshot
+                                </button>
+                                <button 
+                                    onClick={handleContinueMatching}
+                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                                >
+                                    Continue Matching
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 export default function App() {
     // States from your main application
@@ -8776,6 +9869,7 @@ export default function App() {
             case 'uniformGuide': return <UniformGuide setPage={setPage} />;
             case 'obstacleCourse': return <ObstacleCourseGame setPage={setPage} />;
             case 'rankStructure': return <RankStructureGuide setPage={setPage} />;
+            case 'aiPoseMatcher': return <AIPoseMatcher setPage={setPage} />;
 
             case 'examTests': return <ExamTestsPage setPage={setPage} examId={examId} setTestId={setTestId} />;
             case 'proctoredTest': return <ProctoredTestPage setPage={setPage} examId={examId} testId={testId} setLastTestResult={setLastTestResult} />;
